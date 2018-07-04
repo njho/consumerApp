@@ -70,6 +70,29 @@ const getters = {
             })
         }
     },
+    getUserVehicles: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('vehicles').onSnapshot(querySnapshot => {
+                let array = [];
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id);
+                    array.push({
+                        ...doc.data(),
+                        id: doc.id,
+                        title: `${doc.data().make + ' ' + doc.data().model}`,
+                        subtitle: `${doc.data().year + ' ' + doc.data().color + ' ' + doc.data().license}`,
+                    });
+                });
+                console.log(array);
+                dispatch({
+                    type: 'SET_USER_VEHICLES',
+                    value: array
+                });
+
+
+            })
+        }
+    },
 
 };
 
@@ -114,7 +137,6 @@ const setters = {
 const actions = {
     sendFeedback: (uid, feedback) => {
         return dispatch => {
-
             firestore.collection('feedback').add({
                     uid: uid,
                     feedback: feedback,
@@ -125,14 +147,14 @@ const actions = {
                     NavigationService.navigate('Home');
 
                 });
-
         }
     },
-    sendVehicleInformation: (uid, vehicleObject, isNew) => {
+    sendVehicleInformation: (uid, vehicleObject, isNew, docId) => {
         return dispatch => {
             console.log(isNew);
             console.log(vehicleObject);
             console.log(uid);
+            console.log(docId);
             if (isNew) {
                 firestore.collection('users').doc(uid).collection('vehicles').add(vehicleObject)
                     .then((docRef) => {
@@ -140,14 +162,26 @@ const actions = {
                         NavigationService.navigate('Settings');
                     });
             } else {
-                firestore.collection('users').doc(uid).collection('vehicles').set(vehicleObject)
+                firestore.collection('users').doc(uid).collection('vehicles').doc(docId).set(vehicleObject)
                     .then((docRef) => {
+                        console.log('set successfully');
                         NavigationService.navigate('Settings');
                     });
             }
         }
     },
-};
+    deleteVehicle: (uid, docId) => {
+        return dispatch => {
+
+            firestore.collection('users').doc(uid).collection('vehicles').doc(docId).delete()
+                .then((docRef) => {
+                console.log('deletion complete');
+                    NavigationService.navigate('Settings');
+                });
+
+        }
+    }
+}
 
 
 export default {

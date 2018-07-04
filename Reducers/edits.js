@@ -3,7 +3,8 @@ const defaultState = {
     make: null,
     model: null,
     year: null,
-    license: null
+    license: null,
+    docId: null
 
 };
 
@@ -43,6 +44,9 @@ export default (state = defaultState, action) => {
                 license: action.value
             };
         case 'SET_EDIT_VEHICLE':
+
+            console.log('SET_EDIT_VEHICLE');
+            console.log(action.value);
             return {
                 ...state,
                 make: action.value.make,
@@ -50,7 +54,8 @@ export default (state = defaultState, action) => {
                 year: action.value.year,
                 color: action.value.color,
                 octane: action.value.octane,
-                license: action.value.license
+                license: action.value.license,
+                docId: action.value.id
             }
     }
 

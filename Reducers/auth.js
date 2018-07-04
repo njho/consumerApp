@@ -6,7 +6,8 @@ const defaultState = {
     lastName: null,
     phoneNumber: null,
 
-    userInfoUpdated: false
+    userInfoUpdated: false,
+    vehicles: null
 };
 
 export default (state = defaultState, action) => {
@@ -46,7 +47,11 @@ export default (state = defaultState, action) => {
                 ...state,
                 userInfoUpdated: action.value
             };
-
+        case 'SET_USER_VEHICLES':
+            return {
+                ...state,
+                vehicles: action.value
+            };
     }
 
     return state;

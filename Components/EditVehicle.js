@@ -29,14 +29,6 @@ const list = [
         route: 'Vehicles'
     },
 ];
-const addNew = [
-    {
-        title: 'Add New',
-        subtitle: '1999 Red BNN2260',
-        icon: 'add'
-
-    },
-];
 
 const mapStateToProps = state => ({
     make: state.edits.make,
@@ -45,10 +37,12 @@ const mapStateToProps = state => ({
     color: state.edits.color,
     octane: state.edits.octane,
     license: state.edits.license,
+    docId: state.edits.docId,
 
 
     userInfoUpdated: state.auth.userInfoUpdated,
     user: state.auth.user,
+    vehicles: state.auth.vehicles
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -70,7 +64,9 @@ const mapDispatchToProps = dispatch => ({
     setLicensePlate: (value) => {
         dispatch({type: 'SET_LICENSE_PLATE', value: value});
     },
-    sendVehicleInformation: (uid, vehicleObject, isNew) => dispatch(agent.actions.sendVehicleInformation(uid, vehicleObject, isNew))
+    sendVehicleInformation: (uid, vehicleObject, isNew, docId) => dispatch(agent.actions.sendVehicleInformation(uid, vehicleObject, isNew, docId)),
+    deleteVehicle: (uid, docId) => dispatch(agent.actions.deleteVehicle(uid, docId))
+
 });
 
 
@@ -107,18 +103,50 @@ class EditVehicle extends React.Component {
     };
 
     sendVehicleInformation(isNew) {
-        console.log(isNew);
 
-        this.props.sendVehicleInformation(this.props.user.uid,
-            {
-                make: this.props.make,
-                model: this.props.model,
-                year: this.props.year,
-                color: this.props.color,
-                octane: this.props.octane,
-                license: this.props.license
-            },
-            isNew);
+        console.log(this.props);
+
+        if (this.props.make && this.props.model && this.props.year && this.props.color && this.props.octane && this.props.license) {
+            console.log(isNew);
+            if (isNew) {
+                this.props.sendVehicleInformation(this.props.user.uid,
+                    {
+                        make: this.props.make,
+                        model: this.props.model,
+                        year: this.props.year,
+                        color: this.props.color,
+                        octane: this.props.octane,
+                        license: this.props.license
+                    },
+                    isNew, null);
+            } else {
+                console.log('this is the docID + ' + this.props.docId);
+                this.props.sendVehicleInformation(this.props.user.uid,
+                    {
+                        make: this.props.make,
+                        model: this.props.model,
+                        year: this.props.year,
+                        color: this.props.color,
+                        octane: this.props.octane,
+                        license: this.props.license
+                    },
+                    isNew, this.props.docId);
+            }
+        } else {
+            Alert.alert(
+                'Please Ensure You Have Selected All Fields',
+                '',
+                [
+                    {
+                        text: 'OK',
+
+                    },
+                ],
+                {cancelable: false}
+            )
+        }
+
+
     }
 
     render() {
@@ -129,19 +157,23 @@ class EditVehicle extends React.Component {
 
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Acura TL</Text>
+                    <Text style={styles.headerTitle}>{isNew ? 'Add' : 'Edit'} Vehicle Details</Text>
                     <TouchableOpacity onPress={() => Alert.alert(
                         'Delete Vehicle',
                         'Are you sure you would like to delete this vehicle?',
                         [
                             {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                            {text: 'OK', onPress: () => console.log('OK Pressed')},
+                            {
+                                text: 'OK',
+                                onPress: () => this.props.deleteVehicle(this.props.user.uid, this.props.docId)
+                            },
                         ],
                         {cancelable: false}
                     )}>
                         <Icon name="ios-trash" size={25} color={'rgba(255,255,255,0.9)'}/>
                     </TouchableOpacity>
                 </View>
+
                 <View style={styles.listItem}>
                     <Text style={styles.pickerTitle}>Make</Text>
                     <Picker
@@ -178,7 +210,6 @@ class EditVehicle extends React.Component {
                         onValueChange={(itemValue, itemIndex) => this.props.setYear(itemValue)}>
                         {
                             years.map((make, index) => {
-                                    console.log(make.label);
                                     return <Picker.Item key={index} label={make.label.toString()} value={make.value}/>
                                 }
                             )
@@ -236,7 +267,7 @@ class EditVehicle extends React.Component {
                         <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.completionButton} onPress={() => this.saveVehicle(isNew)}>
+                <TouchableOpacity style={styles.completionButton} onPress={() => this.sendVehicleInformation(isNew)}>
                     <Icon name="ios-checkmark" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
                     <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Save </Text>
                 </TouchableOpacity>

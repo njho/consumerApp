@@ -5,6 +5,7 @@ import {
     Platform,
     Image,
     Text,
+    ScrollView,
     TextInput,
     View,
     Button,
@@ -34,12 +35,12 @@ const list = [
 ];
 
 const emptyObject = {
-    make: null,
-    model: null,
-    color: null,
-    year: null,
-    license: null,
-    octane: null
+    make: 'AC',
+    model: 'Ace',
+    color: 'Red',
+    year: 2018,
+    license: '',
+    octane: 'Regular'
 };
 
 const addNew = [
@@ -59,7 +60,8 @@ const mapStateToProps = state => ({
     lastName: state.auth.lastName,
     phoneNumber: state.auth.phoneNumber,
 
-    userInfoUpdated: state.auth.userInfoUpdated
+    userInfoUpdated: state.auth.userInfoUpdated,
+    vehicles: state.auth.vehicles
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -91,6 +93,8 @@ class Vehicles extends React.Component {
             this.props.setEditVehicle(emptyObject);
             this.props.navigation.navigate('EditVehicle', {isNew: true})
         } else {
+            console.log('is not new');
+            console.log(item);
             this.props.setEditVehicle(item);
             this.props.navigation.navigate('EditVehicle', {isNew: false})
         }
@@ -106,9 +110,10 @@ class Vehicles extends React.Component {
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Your Vehicles</Text>
                     </View>
+                    <ScrollView>
                     <List containerStyle={{marginTop: 0}}>
                         {
-                            list.map((item, i) => (
+                            this.props.vehicles.map((item, i) => (
                                 <ListItem
                                     key={i}
                                     leftAvatar={{source: {uri: item.avatar_url}}}
@@ -129,6 +134,7 @@ class Vehicles extends React.Component {
                             ))
                         }
                     </List>
+                    </ScrollView>
                     <TouchableOpacity style={styles.titleView}
                                       onPress={() => this.navigateToRoute(null)}>
                         <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>

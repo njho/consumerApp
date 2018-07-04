@@ -38,6 +38,9 @@ const mapDispatchToProps = dispatch => ({
     },
     getUserDetails: (uid) => {
         dispatch(agent.getters.getUser(uid))
+    },
+    getuserVehicles: (uid) => {
+        dispatch(agent.getters.getUserVehicles(uid))
     }
 });
 
@@ -63,6 +66,8 @@ class BasicOrder extends React.Component {
     componentWillMount() {
         console.log(this.props.user.uid);
         this.props.getUserDetails(this.props.user.uid);
+        this.props.getuserVehicles(this.props.user.uid);
+
     }
 
     gasSelection = (value) => {
