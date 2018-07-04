@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "477797786732",
+    "firebase_url": "https://surefuelapp.firebaseio.com",
+    "project_id": "surefuelapp",
+    "storage_bucket": "surefuelapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477797786732:android:39c61d78f5df3d5b",
+        "android_client_info": {
+          "package_name": "com.surefuel.surefuelapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477797786732-k5895e9sr1pa2m5c4v8eq4nhad7tvmms.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5menk1me8CCuqR8g_hnxX5Q_TEssqOqY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
