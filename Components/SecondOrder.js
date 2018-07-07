@@ -21,7 +21,9 @@ const width = Dimensions.get('window').width;
 
 const mapStateToProps = state => ({
     servicesSelected: state.common.servicesSelected,
-
+    windshield: state.common.windshield,
+    topUp: state.common.topUp,
+    tire: state.common.tire
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -37,22 +39,7 @@ class SecondOrder extends React.Component {
     constructor() {
         super();
         this.state = {
-            services: [
-                {
-                    title: 'Windshield Washer Fluid Top Up',
-                    description: 'Just as it sounds.',
-                    price: '$5'
-                },
-                {
-                    title: 'Windshield Chip Repair',
-                    description: 'Our technician will take care of that nasty crack in your windshield for you.',
-                    price: '$20'
-                },
-                {
-                    title: 'Tire Check & Fill',
-                    description: 'Tire looking flat? Our mobile compressor has you taken care of.',
-                    price: '$50'
-                }]
+
         }
     };
 
@@ -64,6 +51,27 @@ class SecondOrder extends React.Component {
             <Icon name="ios-home" size={25} color={tintColor}/>
         ),
     };
+
+    componentWillMount() {
+        this.setState({
+            services: [
+                {
+                    title: 'Windshield Washer Fluid Top Up',
+                    description: 'Just as it sounds.',
+                    price: `${this.props.windshield}`
+                },
+                {
+                    title: 'Windshield Chip Repair',
+                    description: 'Our technician will take care of that nasty crack in your windshield for you.',
+                    price: `${this.props.topUp}`
+                },
+                {
+                    title: 'Tire Check & Fill',
+                    description: 'Tire looking flat? Our mobile compressor has you taken care of.',
+                    price: `${this.props.tire}`
+                }]
+        })
+    }
 
     gasSelection = (value) => {
         this.interactable.snapTo({index: 1});
@@ -172,14 +180,14 @@ class SecondOrder extends React.Component {
                                     fontWeight: 'normal',
                                     color: 'white',
                                 }]}>
-                                    {item.price}
+                                    ${item.price}
                                 </Text>
                             </View>
                         </TouchableOpacity>
                     }
                 />
                 <TouchableOpacity onPress={()=>this.props.navigation.navigate('OrderSummary')} style={{marginBottom: 20, marginTop: 10}}>
-                    <Text style={{color: 'white',}}>CONTINUE</Text>
+                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>CONTINUE</Text>
                 </TouchableOpacity>
 
             </View>
@@ -202,7 +210,7 @@ const styles = StyleSheet.create({
     header: {
         width: width,
         paddingTop: 20,
-        paddingBottom: 15,
+        paddingBottom: 10,
         paddingHorizontal: 30,
         justifyContent: 'flex-start',
         flexDirection: 'column',
@@ -248,7 +256,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         // borderColor: '#92c1ff',
         // borderWidth: 1,
-        backgroundColor: 'rgba(0,0,0,0.1)',
+        backgroundColor: 'rgba(250,250,250,0.2)',
         borderRadius: 3,
         marginBottom: 3,
         marginHorizontal: 5,

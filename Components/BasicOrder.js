@@ -5,7 +5,7 @@ import {
     Image,
     Text,
     View,
-    Button,
+    Alert,
     TouchableOpacity,
     Dimensions,
     Animated,
@@ -15,6 +15,9 @@ import {connect} from 'react-redux';
 import MapView, {Polygon} from 'react-native-maps';
 import Interactable from 'react-native-interactable';
 import Icon from 'react-native-vector-icons/Ionicons';
+import firebase from 'react-native-firebase';
+
+const firestore = firebase.firestore();
 
 import agent from '../Helpers/agent';
 
@@ -26,7 +29,12 @@ const width = Dimensions.get('window').width;
 const mapStateToProps = state => ({
     octane: state.common.octane,
     orderHour: state.common.orderHour,
-    user: state.auth.user
+    orderFill: state.common.orderFill,
+    user: state.auth.user,
+    zones: state.common.zones,
+
+    regular: state.common.regular,
+    premium: state.common.premium
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -36,11 +44,26 @@ const mapDispatchToProps = dispatch => ({
     hourSelected: (value) => {
         dispatch({type: 'ORDER_HOUR_SELECTED', value: value});
     },
+    fillSelected: (value) => {
+        dispatch({type: 'FILL_SELECTED', value: value});
+    },
     getUserDetails: (uid) => {
         dispatch(agent.getters.getUser(uid))
     },
     getuserVehicles: (uid) => {
         dispatch(agent.getters.getUserVehicles(uid))
+    },
+    getUserCreditCards: (uid) => {
+        dispatch(agent.getters.getUserCreditCards(uid))
+    },
+    getZones: (city) => {
+        dispatch(agent.getters.getZones(city))
+    },
+    resetAllOrderInfo: (uid) => {
+        dispatch({type: 'RESET_ALL_ORDER_INFO',});
+    },
+    setRates: (value) => {
+        dispatch({type: 'SET_RATES', value: value});
     }
 });
 
@@ -67,7 +90,18 @@ class BasicOrder extends React.Component {
         console.log(this.props.user.uid);
         this.props.getUserDetails(this.props.user.uid);
         this.props.getuserVehicles(this.props.user.uid);
+        this.props.getUserCreditCards(this.props.user.uid);
+        this.props.resetAllOrderInfo();
+        this.props.getZones('calgary');
 
+        // firestore.collection('zones').doc('calgary').collection('zones').doc('repsol').set({
+        //     poly: this.poly,
+        //     id: 'The Repsol Centre'
+        // });
+        // firestore.collection('zones').doc('calgary').collection('zones').doc('commons').set({
+        //     poly: this.commons,
+        //     id: 'The Commons'
+        // });
     }
 
     gasSelection = (value) => {
@@ -92,61 +126,6 @@ class BasicOrder extends React.Component {
         ).start();
     };
 
-    commons = [
-        {latitude: 51.0356349007015, longitude: -114.0366573241663},
-        {latitude: 51.035744625039555, longitude: -114.03665195974827},
-        {latitude: 51.035744625039555, longitude: -114.03656881126881},
-        {latitude: 51.035747010348366, longitude: -114.0363864210558},
-        {latitude: 51.0360117788631, longitude: -114.03638373884678},
-        {latitude: 51.036016549453116, longitude: -114.03585534367085},
-        {latitude: 51.03656277875984, longitude: -114.0358472970438},
-        {latitude: 51.03656394626553, longitude: -114.036634663781},
-        {latitude: 51.03667309004739, longitude: -114.03663769234106},
-        {latitude: 51.03668478520088, longitude: -114.03565881173552},
-        {latitude: 51.03564002933458, longitude: -114.03578755776823},
-        {latitude: 51.03564002933458, longitude: -114.03593776147306},
-        {latitude: 51.035535075388445, longitude: -114.03597531239927},
-        {latitude: 51.03554461666609, longitude: -114.03667805116118},
-        {latitude: 51.03562333528205, longitude: -114.03666100441097}]
-
-    poly = [
-        {latitude: 51.034877062138555, longitude: -114.06245120763265},
-        {latitude: 51.034782606861526, longitude: -114.06242974996053},
-        {latitude: 51.03470164504221, longitude: -114.06240829228841},
-        {latitude: 51.03458020204807, longitude: -114.06238683461629},
-        {latitude: 51.03451948043165, longitude: -114.06237610578023},
-        {latitude: 51.03417538976893, longitude: -114.06257995366536},
-        {latitude: 51.03417538976893, longitude: -114.06266578435384},
-        {latitude: 51.03413490834654, longitude: -114.06279453038655},
-        {latitude: 51.03400865219269, longitude: -114.06296619176351},
-        {latitude: 51.033947929827335, longitude: -114.06324514150106},
-        {latitude: 51.033900701265935, longitude: -114.06340607404195},
-        {latitude: 51.03381973790583, longitude: -114.06340607404195},
-        {latitude: 51.03377925617275, longitude: -114.06340607404195},
-        {latitude: 51.03369829260046, longitude: -114.06334170102559},
-        {latitude: 51.03371178653901, longitude: -114.06320222615682},
-        {latitude: 51.03369829260046, longitude: -114.0631271243044},
-        {latitude: 51.03366455773695, longitude: -114.06298764943563},
-        {latitude: 51.03362741744859, longitude: -114.06284275940641},
-        {latitude: 51.03362741744859, longitude: -114.0627140133737},
-        {latitude: 51.03366115233916, longitude: -114.06257453850492},
-        {latitude: 51.03362741744859, longitude: -114.06217757157071},
-        {latitude: 51.03360042951846, longitude: -114.0619951813577},
-        {latitude: 51.03359368253346, longitude: -114.06178060463651},
-        {latitude: 51.03359368253346, longitude: -114.06153384140714},
-        {latitude: 51.03364765838589, longitude: -114.06134072235807},
-        {latitude: 51.033708381144685, longitude: -114.06113687447294},
-        {latitude: 51.03394452445037, longitude: -114.06086865357145},
-        {latitude: 51.034221147935135, longitude: -114.06078282288297},
-        {latitude: 51.03448427605899, longitude: -114.06091156891569},
-        {latitude: 51.03464620031569, longitude: -114.06110468796476},
-        {latitude: 51.03471366858897, longitude: -114.06129780701383},
-        {latitude: 51.035111729401905, longitude: -114.06153384140714},
-        {latitude: 51.03519269050473, longitude: -114.06166258743986},
-        {latitude: 51.03526690472472, longitude: -114.06195226601346},
-        {latitude: 51.035179196997426, longitude: -114.06227413109525},
-        {latitude: 51.03494980677193, longitude: -114.06245652130826},
-        {latitude: 51.03488233884245, longitude: -114.0624457924722}];
 
     regionChangeComplete = (event) => {
         console.log(event);
@@ -159,12 +138,34 @@ class BasicOrder extends React.Component {
             }
         ).start();
 
-        if (inside([event.latitude, event.longitude], this.poly.map(c => [c.latitude, c.longitude]))) {
+        let cat = 0;
+
+        this.props.zones.map((element, index) => {
+            console.log(element.id);
+            if (inside([event.latitude, event.longitude], element.poly.map(c => [c.latitude, c.longitude]))) {
+                cat = 1;
+                this.props.setRates(element);
+            } else {
+                if(cat === 1) {
+
+                } else {
+                    cat = 0;
+
+                }
+
+            }
+        });
+
+        if (cat === 1) {
             this.interactable.snapTo({index: 0});
         } else {
+            this.props.resetAllOrderInfo();
+
             this.interactable.snapTo({index: 2});
             this.props.octaneSelected(null);
         }
+
+
     };
 
     showMap = () => {
@@ -177,6 +178,26 @@ class BasicOrder extends React.Component {
                 easing: Easing.inOut(Easing.ease)
             }
         ).start(() => this.setState({...this.state, mapVisible: true}));
+    };
+
+    submit = () => {
+        if (this.props.orderHour === 0 || this.props.octane === 0 || this.props.orderFill === 0) {
+            Alert.alert('Please select all fields!');
+        } else {
+            this.props.navigation.navigate('secondOrder');
+        }
+    };
+
+    renderZones = () => {
+        return this.props.zones.map((element, index) => {
+            return <Polygon
+                key={index}
+                coordinates={element.poly}
+                fillColor="rgba(209,133,255, 0.3)"
+                strokeColor="#d185ff"
+                strokeWidth={1}
+            />
+        })
     };
 
 
@@ -210,7 +231,7 @@ class BasicOrder extends React.Component {
                         <View style={styles.logoContainer}>
                             <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
                             <Text style={styles.welcome}>
-                                SUREFUEL </Text>
+                                SURE FUEL </Text>
                             <Text style={styles.subheader}>
                                 TAP THE APP TO FILL </Text>
                         </View>
@@ -248,19 +269,8 @@ class BasicOrder extends React.Component {
                     // setMapToolbarEnabled={true}
 
                 >
-                    <Polygon
-                        coordinates={this.poly}
-                        fillColor="rgba(209,133,255, 0.3)"
-                        strokeColor="#d185ff"
-                        strokeWidth={1}
-                    />
+                    {this.props.zones.length > 0 ? this.renderZones() : null}
 
-                    <Polygon
-                        coordinates={this.commons}
-                        fillColor="rgba(209,133,255, 0.3)"
-                        strokeColor="#d185ff"
-                        strokeWidth={1}
-                    />
                 </MapView>
 
                 <Animated.View
@@ -327,7 +337,7 @@ class BasicOrder extends React.Component {
                                 id: 'close'
                             },]}
                         boundaries={{top: -200}}
-                        initialPosition={{y: height * 2}} >
+                        initialPosition={{y: height * 2}}>
                         <View style={styles.card}>
                             <View style={[styles.cardContainer]}>
                                 <View style={{position: 'absolute'}}>
@@ -335,13 +345,15 @@ class BasicOrder extends React.Component {
                                 </View>
                                 <View style={styles.send}>
                                     <TouchableOpacity style={styles.sendButton}
-                                                      onPress={() => this.props.navigation.navigate('secondOrder')
+                                                      onPress={() => {
+                                                          this.submit();
+                                                      }
                                                       }>
                                         <Icon name="md-send" size={25} color={'white'}/>
                                     </TouchableOpacity>
                                 </View>
 
-                                <View style={[styles.buttonContainer,  ]}>
+                                <View style={[styles.buttonContainer,]}>
                                     <View style={styles.buttons}>
                                         <View style={styles.button}>
                                             <Text style={styles.selectionText}>REGULAR</Text>
@@ -350,7 +362,7 @@ class BasicOrder extends React.Component {
                                                                   backgroundColor: this.props.octane === 87 ? '#7e4e9b' : '#d185ff',
                                                                   elevation: this.props.octane === 87 ? 10 : 1
                                                               }]}>
-                                                <Text style={{color: 'white'}}>93.3</Text>
+                                                <Text style={{color: 'white'}}>{this.props.regular}</Text>
                                             </TouchableOpacity>
                                         </View>
                                         <View style={styles.button}>
@@ -360,7 +372,7 @@ class BasicOrder extends React.Component {
                                                                   backgroundColor: this.props.octane === 94 ? '#7e4e9b' : '#d185ff',
                                                                   elevation: this.props.octane === 94 ? 10 : 1
                                                               }]}>
-                                                <Text style={{color: 'white'}}>101.4</Text>
+                                                <Text style={{color: 'white'}}>{this.props.premium}</Text>
                                             </TouchableOpacity>
                                         </View>
 
@@ -401,52 +413,52 @@ class BasicOrder extends React.Component {
                                     <Text style={styles.selectionText}>PRE-AUTHORIZATION AMOUNT</Text>
                                     <View style={styles.hourPicker}>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(1)}
+                                            onPress={() => this.props.fillSelected(20)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 1 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 1 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 20 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 20 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$20</Text>
+                                            <Text style={styles.preAuthText}>$20</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(2)}
+                                            onPress={() => this.props.fillSelected(40)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 2 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 2 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 40 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 40 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$40</Text>
+                                            <Text style={styles.preAuthText}>$40</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(4)}
+                                            onPress={() => this.props.fillSelected(60)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 4 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 4 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 60 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 60 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$60</Text>
+                                            <Text style={styles.preAuthText}>$60</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(4)}
+                                            onPress={() => this.props.fillSelected(80)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 4 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 4 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 80 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 80 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$80</Text>
+                                            <Text style={styles.preAuthText}>$80</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(4)}
+                                            onPress={() => this.props.fillSelected(100)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 4 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 4 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 100 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 100 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$100</Text>
+                                            <Text style={styles.preAuthText}>$100</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            onPress={() => this.hourSelection(4)}
+                                            onPress={() => this.props.fillSelected(200)}
                                             style={[styles.preAuthButton, [{
-                                                backgroundColor: this.props.orderHour === 4 ? '#7e4e9b' : '#dda6ff',
-                                                elevation: this.props.orderHour === 4 ? 5 : 1
+                                                backgroundColor: this.props.orderFill === 200 ? '#7e4e9b' : '#dda6ff',
+                                                elevation: this.props.orderFill === 200 ? 5 : 1
                                             }]]}>
-                                            <Text style={styles.hourText}>$200</Text>
+                                            <Text style={styles.preAuthText}>$200 (Fill)</Text>
                                         </TouchableOpacity>
 
                                     </View>
@@ -475,8 +487,7 @@ const styles = StyleSheet.create({
     },
     preAuthButton: {
         width: width / 8,
-        height: width/8,
-
+        height: width / 8,
         paddingVertical: 10,
         justifyContent: 'center',
         alignItems: 'center',
@@ -499,7 +510,14 @@ const styles = StyleSheet.create({
     },
     hourText: {
         color: 'white', //rgba(209,133,255, 1)
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        textAlign: 'center'
+    },
+    preAuthText: {
+        color: 'white', //rgba(209,133,255, 1)
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fontSize: 11
     },
     card: {
         backgroundColor: 'rgba(255,255,255,0.85)',
@@ -614,3 +632,16 @@ const styles = StyleSheet.create({
     }
 });
 
+/*               <Polygon
+                        coordinates={this.poly}
+                        fillColor="rgba(209,133,255, 0.3)"
+                        strokeColor="#d185ff"
+                        strokeWidth={1}
+                    />
+
+                    <Polygon
+                        coordinates={this.commons}
+                        fillColor="rgba(209,133,255, 0.3)"
+                        strokeColor="#d185ff"
+                        strokeWidth={1}
+                    />*/

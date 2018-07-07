@@ -134,7 +134,7 @@ class EditVehicle extends React.Component {
             }
         } else {
             Alert.alert(
-                'Please Ensure You Have Selected All Fields',
+                'Please Ensure You Have Filled All Fields',
                 '',
                 [
                     {
@@ -158,7 +158,7 @@ class EditVehicle extends React.Component {
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>{isNew ? 'Add' : 'Edit'} Vehicle Details</Text>
-                    <TouchableOpacity onPress={() => Alert.alert(
+                    {isNew ? null : <TouchableOpacity onPress={() => Alert.alert(
                         'Delete Vehicle',
                         'Are you sure you would like to delete this vehicle?',
                         [
@@ -171,7 +171,8 @@ class EditVehicle extends React.Component {
                         {cancelable: false}
                     )}>
                         <Icon name="ios-trash" size={25} color={'rgba(255,255,255,0.9)'}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
+
                 </View>
 
                 <View style={styles.listItem}>

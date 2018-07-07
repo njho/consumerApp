@@ -4,8 +4,9 @@ const defaultState = {
     model: null,
     year: null,
     license: null,
-    docId: null
+    docId: null,
 
+    creditCardDocId: null,
 };
 
 export default (state = defaultState, action) => {
@@ -44,7 +45,6 @@ export default (state = defaultState, action) => {
                 license: action.value
             };
         case 'SET_EDIT_VEHICLE':
-
             console.log('SET_EDIT_VEHICLE');
             console.log(action.value);
             return {
@@ -56,6 +56,12 @@ export default (state = defaultState, action) => {
                 octane: action.value.octane,
                 license: action.value.license,
                 docId: action.value.id
+            };
+        case 'SET_EDIT_CREDIT_CARD':
+            console.log(action.value);
+            return {
+                ...state,
+                creditCardDocId: action.value.id
             }
     }
 

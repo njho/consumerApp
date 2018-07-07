@@ -19,20 +19,6 @@ import {connect} from 'react-redux';
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const list = [
-    {
-        title: 'Acura TL',
-        subtitle: '1999 Red BNN2260',
-        route: 'EditVehicle',
-        make: 'Acura',
-        model: 'TL',
-        color: 'red',
-        year: 2001,
-        license: 'BNN-2260',
-        octane: 'Premium',
-
-    },
-];
 
 const emptyObject = {
     make: 'AC',
@@ -42,16 +28,6 @@ const emptyObject = {
     license: '',
     octane: 'Regular'
 };
-
-const addNew = [
-    {
-        title: 'Add New',
-        subtitle: '1999 Red BNN2260',
-        icon: 'add'
-
-    },
-];
-
 
 const mapStateToProps = state => ({
     user: state.auth.user,

@@ -76,7 +76,7 @@ class Loading extends React.Component {
                     this.storeData().then(() => this.props.navigation.navigate('WalkThrough'));
                 } else {
                     this.props.setUser(user);
-                    this.props.navigation.navigate('Home')
+                    this.props.navigation.navigate('OrderSummary')
                     // this.props.navigation.navigate('Home')
                 }
             } else {
@@ -145,7 +145,7 @@ class Loading extends React.Component {
                     <View style={styles.logoContainer}>
                         <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
                         <Text style={styles.welcome}>
-                            SUREFUEL </Text>
+                            SURE FUEL </Text>
                         <Text style={styles.subheader}>
                             TAP THE APP TO FILL </Text>
                     </View>

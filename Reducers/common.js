@@ -1,10 +1,16 @@
 const defaultState = {
-    octane: null,
+    octane: 0,
     loginState: 0,
     orderHour: 0,
+    orderFill: 0,
     servicesSelected: [false, false, false],
-    feedback: null
-
+    feedback: null,
+    zones: [],
+    regular: 0,
+    premium: 0,
+    windshield: 0,
+    topUp: 0,
+    tire: 0,
 };
 
 export default (state = defaultState, action) => {
@@ -18,6 +24,11 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 orderHour: action.value
+            };
+        case 'FILL_SELECTED':
+            return {
+                ...state,
+                orderFill: action.value
             };
         case 'SET_LOGIN_STATE':
             return {
@@ -36,6 +47,30 @@ export default (state = defaultState, action) => {
                 ...state,
                 feedback: action.value
             };
+        case 'RESET_ALL_ORDER_INFO':
+            return {
+                ...state,
+                loginState: 0,
+                orderHour: 0,
+                orderFill: 0,
+                servicesSelected: [false, false, false],
+            };
+        case 'SET_AVAILABLE_ZONES':
+            return {
+                ...state,
+                zones: action.value
+            };
+        case 'SET_RATES':
+            console.log(action.value);
+            return {
+                ...state,
+                regular: action.value.regular,
+                premium: action.value.premium,
+                windshield: action.value.windshield,
+                topUp: action.value.topUp,
+                tire: action.value.tire
+            };
+
     }
 
     return state;

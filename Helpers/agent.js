@@ -93,6 +93,48 @@ const getters = {
             })
         }
     },
+    getUserCreditCards: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('creditCards').onSnapshot(querySnapshot => {
+                let array = [];
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id);
+                    array.push({
+                        ...doc.data(),
+                        id: doc.id,
+                    });
+                });
+                console.log(array);
+                dispatch({
+                    type: 'SET_USER_CREDIT_CARDS',
+                    value: array
+                });
+
+
+            })
+        }
+    },
+    getZones: (city) => {
+        return dispatch => {
+            firestore.collection('zones').doc(city).collection('zones').onSnapshot(querySnapshot => {
+                let array = [];
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id);
+                    array.push({
+                        ...doc.data(),
+                        id: doc.id,
+                    });
+                });
+                dispatch({
+                    type: 'SET_AVAILABLE_ZONES',
+                    value: array
+                });
+
+
+            })
+        }
+    },
+
 
 };
 
@@ -175,12 +217,48 @@ const actions = {
 
             firestore.collection('users').doc(uid).collection('vehicles').doc(docId).delete()
                 .then((docRef) => {
-                console.log('deletion complete');
+                    console.log('deletion complete');
                     NavigationService.navigate('Settings');
                 });
 
         }
-    }
+    },
+    deleteCreditCard: (uid, docId) => {
+        console.log('Delete Credit Card');
+        console.log(docId);
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('creditCards').doc(docId).delete()
+                .then((docRef) => {
+                    console.log('deletion complete');
+                    NavigationService.navigate('Settings');
+                });
+
+        }
+    },
+    createStripeCustomer: (body) => {
+        console.log(body);
+
+        return fetch('https://us-central1-surefuelapp.cloudfunctions.net/createCustomerAccount', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        }).then((response => console.log(response)))
+    },
+    updateStripeCustomer: (body) => {
+        console.log(body);
+        return fetch('https://us-central1-surefuelapp.cloudfunctions.net/updateCustomerAccount', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        }).then((response => console.log(response)))
+    },
+
 }
 
 

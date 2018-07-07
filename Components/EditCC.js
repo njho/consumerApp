@@ -13,56 +13,39 @@ import {
     Alert,
     Dimensions
 } from 'react-native';
-import MapView from 'react-native-maps';
-import LinearGradient from 'react-native-linear-gradient';
+import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {CreditCardInput, LiteCreditCardInput} from "react-native-credit-card-input";
 import _ from 'lodash';
+import agent from '../Helpers/agent';
 
 import cars from './Helpers/cars';
-import Dropdown from './Dropdown';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const list = [
-    {
-        title: 'Acura TL',
-        subtitle: '1999 Red BNN2260',
-        route: 'Vehicles'
+const mapDispatchToProps = dispatch => ({
+    setEditVehicle: (value) => {
+        dispatch({type: 'SET_EDIT_VEHICLE', value: value});
     },
-];
-const addNew = [
-    {
-        title: 'Add New',
-        subtitle: '1999 Red BNN2260',
-        icon: 'add'
-
-    },
-];
+    deleteCreditCard: (uid, docId) => dispatch(agent.actions.deleteCreditCard(uid, docId))
+});
 
 
-const years = [];
+const mapStateToProps = state => ({
+    user: state.auth.user,
+    creditCardDocId: state.edits.creditCardDocId
+});
 
-const currentYear = new Date().getFullYear();
 
-for (let year = 1950; year <= currentYear; year += 1) {
-    years.unshift({
-        label: year.toString(),
-        value: year,
-    });
-}
-
-const makes = Object.keys(cars).map(make => ({
-    label: _.startCase(make),
-    value: make,
-}));
-
-export default class EditCC extends React.Component {
+class EditCC extends React.Component {
     constructor() {
         super();
         this.state = {
-            // firebase things?
+            valid: false,
+            number: null,
+            exp_year: null,
+            cvc: null
         };
     }
 
@@ -74,35 +57,67 @@ export default class EditCC extends React.Component {
         ),
     };
 
-    saveVehicle() {
+    saveVehicle(isNew) {
+        console.log(this.state);
+        console.log(this.props.creditCardDocId);
+
+        if(isNew && this.state.valid) {
+            agent.actions.createStripeCustomer({
+                uid: this.props.user.uid,
+                number: this.state.number,
+                exp_year: this.state.exp_year,
+                cvc: this.state.cvc,
+            });
+        } else if(this.state.valid) {
+            agent.actions.updateStripeCustomer({
+                uid: this.props.user.uid,
+                number: this.state.number,
+                exp_year: this.state.exp_year,
+                cvc: this.state.cvc,
+                docId: this.props.creditCardDocId
+            });
+        }
         this.props.navigation.goBack();
+
     }
 
-    _onChange = (formData) => console.log(JSON.stringify(formData, null, " "));
+    _onChange = (formData) => {
+        let formInfo = JSON.stringify(formData, null, " ");
+        // console.log(formData);
+        this.setState({
+            ...this.state,
+            valid: formData.valid,
+            number: formData.values.number,
+            exp_year: formData.values.expiry,
+            cvc: formData.values.cvc
+        })
+    };
 
 
     render() {
+        const isNew = this.props.navigation.getParam('isNew');
 
         return (
 
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Edit Credit Card</Text>
-                    <TouchableOpacity onPress={() => Alert.alert(
+                    {isNew ? null : <TouchableOpacity onPress={() => Alert.alert(
                         'Delete Credit Card',
                         'Are you sure you would like to delete this Credit Card?',
                         [
                             {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                            {text: 'OK', onPress: () => console.log('OK Pressed')},
+                            {text: 'OK', onPress: () => this.props.deleteCreditCard(this.props.user.uid, this.props.creditCardDocId)},
                         ],
                         {cancelable: false}
                     )}>
                         <Icon name="ios-trash" size={25} color={'rgba(255,255,255,0.9)'}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
+
                 </View>
 
-                <View style={{paddingHorizontal: 20, paddingVertical: 25,  borderBottomWidth: 1, borderColor: '#bbb'}}>
-                    <LiteCreditCardInput onChange={this._onChange} />
+                <View style={{paddingHorizontal: 20, paddingVertical: 25, borderBottomWidth: 1, borderColor: '#bbb'}}>
+                    <LiteCreditCardInput onChange={this._onChange}/>
                 </View>
 
                 <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
@@ -110,7 +125,7 @@ export default class EditCC extends React.Component {
                         <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.completionButton} onPress={() => this.saveVehicle()}>
+                <TouchableOpacity style={styles.completionButton} onPress={() => this.saveVehicle(isNew)}>
                     <Icon name="ios-checkmark" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
                     <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Save </Text>
                 </TouchableOpacity>
@@ -120,6 +135,9 @@ export default class EditCC extends React.Component {
             ;
     }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditCC);
+
 
 const styles = StyleSheet.create({
     avoidingView: {

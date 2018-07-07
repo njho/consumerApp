@@ -7,7 +7,8 @@ const defaultState = {
     phoneNumber: null,
 
     userInfoUpdated: false,
-    vehicles: null
+    vehicles: [],
+    creditCards: []
 };
 
 export default (state = defaultState, action) => {
@@ -51,6 +52,11 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 vehicles: action.value
+            };
+        case 'SET_USER_CREDIT_CARDS':
+            return {
+                ...state,
+                creditCards: action.value
             };
     }
 

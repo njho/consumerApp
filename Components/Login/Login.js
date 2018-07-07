@@ -56,7 +56,7 @@ export default class BasicOrder extends React.Component {
 
                     <Image source={require('../../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
                     <Text style={styles.welcome}>
-                        SUREFUEL </Text>
+                        SURE FUEL </Text>
                     <Text style={styles.subheader}>
                         TAP THE APP TO FILL </Text>
                 </View>

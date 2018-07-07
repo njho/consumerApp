@@ -11,15 +11,9 @@ import {
     TouchableOpacity,
     Dimensions
 } from 'react-native';
-import MapView from 'react-native-maps';
-import LinearGradient from 'react-native-linear-gradient';
+import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {ListItem, List,} from 'react-native-elements';
-
-
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
-
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -33,8 +27,26 @@ const list = [
 
 ];
 
+const mapStateToProps = state => ({
+    user: state.auth.user,
+    email: state.auth.email,
+    firstName: state.auth.firstName,
+    lastName: state.auth.lastName,
+    phoneNumber: state.auth.phoneNumber,
 
-export default class CreditCards extends React.Component {
+    userInfoUpdated: state.auth.userInfoUpdated,
+    vehicles: state.auth.vehicles,
+    creditCards: state.auth.creditCards
+});
+
+const mapDispatchToProps = dispatch => ({
+    setEditCreditCard: (value) => {
+        dispatch({type: 'SET_EDIT_CREDIT_CARD', value: value});
+    },
+});
+
+
+class CreditCards extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -53,6 +65,17 @@ export default class CreditCards extends React.Component {
     };
 
 
+    navigateToRoute = (item) => {
+        if (item === null) {
+            this.props.setEditVehicle(emptyObject);
+            this.props.navigation.navigate('EditCC', {isNew: true})
+        } else {
+            this.props.setEditCreditCard(item);
+            this.props.navigation.navigate('EditCC', {isNew: false})
+        }
+    };
+
+
     render() {
         return (
             <KeyboardAvoidingView keyboardVerticalOffset={100} style={styles.avoidingView}
@@ -62,32 +85,38 @@ export default class CreditCards extends React.Component {
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Your Credit Cards</Text>
                     </View>
-                    <List containerStyle={{marginTop: 0}}>
+                    <List containerStyle={{marginTop: 0, flex: 1}}>
                         {
-                            list.map((item, i) => (
+                            this.props.creditCards.map((item, i) => (
                                 <ListItem
                                     key={i}
                                     leftAvatar={{source: {uri: item.avatar_url}}}
-                                    title={item.title}
-                                    subtitle={item.subtitle}
+                                    title={`**** **** **** ${item.number}`}
+                                    subtitle={`${item.exp_year} ${item.exp_month}`}
                                     subtitleNumberOfLines={2}
                                     containerStyle={{paddingTop: 20, paddingBottom: 20,}}
                                     titleStyle={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}
                                     subtitleContainerStyle={{paddingRight: 20}}
-                                    onPress={() => this.props.navigation.navigate(item.route)}
+                                    onPress={() => this.navigateToRoute((item))}
                                 />
                             ))
                         }
                     </List>
+                    {this.props.creditCards.length > 0 ? null : <TouchableOpacity style={styles.titleView}
+                                                                              onPress={() => this.props.navigation.navigate('EditCC', {isNew: true})}>
+                        <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
+                        <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New CreditCard</Text>
+                    </TouchableOpacity>}
+
                     <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
                         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
                             <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                         </TouchableOpacity>
                     </View>
-                    {list.length > 0 ? null :  <TouchableOpacity style={styles.titleView}>
+                    {list.length > 0 ? null : <TouchableOpacity style={styles.titleView}>
                         <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
                         <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New Vehicle</Text>
-                    </TouchableOpacity> }
+                    </TouchableOpacity>}
 
                 </View>
             </KeyboardAvoidingView>
@@ -96,6 +125,9 @@ export default class CreditCards extends React.Component {
             ;
     }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(CreditCards);
+
 
 const styles = StyleSheet.create({
     avoidingView: {
@@ -134,7 +166,7 @@ const styles = StyleSheet.create({
     },
     titleView: {
         flexDirection: 'row',
-        alignItems:'center',
+        alignItems: 'center',
         width: width,
         justifyContent: 'center',
         paddingVertical: 25,
