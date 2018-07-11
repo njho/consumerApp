@@ -5,27 +5,29 @@ import {
     Platform,
     Image,
     Text,
+    ScrollView,
     TextInput,
     View,
     Button,
     TouchableOpacity,
     Dimensions
 } from 'react-native';
-import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {ListItem, List,} from 'react-native-elements';
+import {connect} from 'react-redux';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
-const list = [
-    {
-        title: '**** **** **** 0624',
-        subtitle: 'Visa 06/20',
-        route: 'EditCC'
-    },
 
-];
+const emptyObject = {
+    make: 'AC',
+    model: 'Ace',
+    color: 'Red',
+    year: 2018,
+    license: '',
+    octane: 'Regular'
+};
 
 const mapStateToProps = state => ({
     user: state.auth.user,
@@ -35,18 +37,16 @@ const mapStateToProps = state => ({
     phoneNumber: state.auth.phoneNumber,
 
     userInfoUpdated: state.auth.userInfoUpdated,
-    vehicles: state.auth.vehicles,
-    creditCards: state.auth.creditCards
+    vehicles: state.auth.vehicles
 });
 
 const mapDispatchToProps = dispatch => ({
-    setEditCreditCard: (value) => {
-        dispatch({type: 'SET_EDIT_CREDIT_CARD', value: value});
+    setEditVehicle: (value) => {
+        dispatch({type: 'SET_EDIT_VEHICLE', value: value});
     },
 });
 
-
-class CreditCards extends React.Component {
+class Vehicles extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -64,14 +64,15 @@ class CreditCards extends React.Component {
 
     };
 
-
     navigateToRoute = (item) => {
         if (item === null) {
             this.props.setEditVehicle(emptyObject);
-            this.props.navigation.navigate('EditCC', {isNew: true})
+            this.props.navigation.navigate('EditVehicle', {isNew: true})
         } else {
-            this.props.setEditCreditCard(item);
-            this.props.navigation.navigate('EditCC', {isNew: false})
+            console.log('is not new');
+            console.log(item);
+            this.props.setEditVehicle(item);
+            this.props.navigation.navigate('EditVehicle', {isNew: false})
         }
     };
 
@@ -83,50 +84,52 @@ class CreditCards extends React.Component {
                 <View style={styles.container}>
 
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Your Credit Cards</Text>
+                        <Text style={styles.headerTitle}>Your Vehicles</Text>
                     </View>
-                    <List containerStyle={{marginTop: 0, flex: 1}}>
+                    <ScrollView>
+                    <List containerStyle={{marginTop: 0}}>
                         {
-                            this.props.creditCards.map((item, i) => (
+                            this.props.vehicles.map((item, i) => (
                                 <ListItem
                                     key={i}
                                     leftAvatar={{source: {uri: item.avatar_url}}}
-                                    title={`**** **** **** ${item.number}`}
-                                    subtitle={`${item.exp_year} ${item.exp_month}`}
+                                    title={item.title}
+                                    subtitle={item.subtitle}
                                     subtitleNumberOfLines={2}
                                     containerStyle={{paddingTop: 20, paddingBottom: 20,}}
                                     titleStyle={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}
                                     subtitleContainerStyle={{paddingRight: 20}}
-                                    onPress={() => this.navigateToRoute((item))}
+                                    onPress={() => this.navigateToRoute(item)}
+                                    leftIcon={{
+                                        name: 'directions-car',
+                                        size: 35,
+                                        color: '#91a3ff',
+                                        style: {marginRight: 20, marginLeft: 10,}
+                                    }}
                                 />
                             ))
                         }
                     </List>
-                    {this.props.creditCards.length > 0 ? null : <TouchableOpacity style={styles.titleView}
-                                                                              onPress={() => this.props.navigation.navigate('EditCC', {isNew: true})}>
+                    </ScrollView>
+                    <TouchableOpacity style={styles.titleView}
+                                      onPress={() => this.navigateToRoute(null)}>
                         <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
-                        <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New Credit Card</Text>
-                    </TouchableOpacity>}
-
+                        <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New Vehicle</Text>
+                    </TouchableOpacity>
                     <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
                         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
                             <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                         </TouchableOpacity>
                     </View>
-                    {list.length > 0 ? null : <TouchableOpacity style={styles.titleView}>
-                        <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
-                        <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New Vehicle</Text>
-                    </TouchableOpacity>}
-
                 </View>
             </KeyboardAvoidingView>
 
         )
             ;
     }
-}
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreditCards);
+export default connect(mapStateToProps, mapDispatchToProps)(Vehicles);
 
 
 const styles = StyleSheet.create({
@@ -135,7 +138,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: 'white'
     },
     header: {
         width: width,
@@ -174,5 +177,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#bbb',
         borderBottomWidth: 1
     }
+
 });
 

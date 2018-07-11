@@ -11,6 +11,9 @@ const defaultState = {
     windshield: 0,
     topUp: 0,
     tire: 0,
+    lat: 0,
+    lng: 0,
+    initialNavigation: null
 };
 
 export default (state = defaultState, action) => {
@@ -68,7 +71,23 @@ export default (state = defaultState, action) => {
                 premium: action.value.premium,
                 windshield: action.value.windshield,
                 topUp: action.value.topUp,
-                tire: action.value.tire
+                tire: action.value.tire,
+
+            };
+        case 'SET_COORDINATES':
+            console.log(action.value);
+            return {
+                ...state,
+                lat: action.lat,
+                lng: action.lng,
+
+            };
+        case 'SET_USER_META':
+            console.log(action.value);
+            return {
+                ...state,
+                firstNavigation: action.firstNavigation
+
             };
 
     }

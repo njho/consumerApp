@@ -21,7 +21,6 @@ const Auth = {
         })
     },
     login: (email, password) => {
-
         return dispatch => {
             authService.signInWithEmailAndPassword(email, password)
                 .then((user) => {
@@ -88,8 +87,32 @@ const getters = {
                     type: 'SET_USER_VEHICLES',
                     value: array
                 });
+            })
+        }
+    },
+    getUserMeta: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).get().then(doc => {
 
+                if (!doc.exists) {
+                    return null
+                } else {
 
+                    let firstNavigation;
+                    console.log('Document data:', doc.data());
+                    if (typeof (doc.data().walkthroughCompleted) === 'undefined') {
+                        firstNavigation = 'WalkThrough';
+                    } else if (typeof doc.data().firstName === 'undefined' && typeof doc.data().lastName === 'undefined' && typeof doc.data().phone === 'undefined' && typeof doc.data().email === 'undefined' && typeof doc.data().walkthroughCompleted !== 'undefined') {
+                        firstNavigation = 'InitialDetails';
+                    } else {
+                        firstNavigation = 'Home'
+                    }
+                    dispatch({
+                        type: 'SET_USER_META',
+                        value: doc.data(),
+                        firstNavigation: firstNavigation
+                    });
+                }
             })
         }
     },
@@ -134,8 +157,6 @@ const getters = {
             })
         }
     },
-
-
 };
 
 
@@ -163,7 +184,8 @@ const setters = {
                     firstName: firstName,
                     lastName: lastName,
                     email: email,
-                    phoneNumber: phoneNumber
+                    phoneNumber: phoneNumber,
+                    walkthroughCompleted: true
                 }, {merge: true})
                 .then((docRef) => {
                     dispatch({
@@ -214,6 +236,9 @@ const actions = {
     },
     deleteVehicle: (uid, docId) => {
         return dispatch => {
+            console.log('delete teh vehicle');
+            console.log(uid);
+            console.log(docId);
 
             firestore.collection('users').doc(uid).collection('vehicles').doc(docId).delete()
                 .then((docRef) => {
@@ -257,6 +282,113 @@ const actions = {
             },
             body: JSON.stringify(body)
         }).then((response => console.log(response)))
+    },
+    createCharge: (uid, chargeSource) => {
+        return dispatch => {
+            console.log('This is the charge');
+            firestore.collection('charges').add({
+                    uid: 'HajsTFokAmh7KJq8bnXdrHPqo9G2',
+                    chargeSource: 'card_1ClJpVBynFeLvZKLI9XP39eq',
+                    chargeDescription: 'Sure Fuel App Order',
+                    chargeAmount: 500000,
+                    isChargeAuth: false,
+                    chargeServiceFee: 2000
+                })
+                .then((docRef) => {
+                    console.log(docRef);
+                    NavigationService.navigate('Home');
+                });
+        }
+    },
+    createOrder: (fillAmount, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshieldCost, tireCost, topUpCost, lat, lng, uid, total) => {
+        return dispatch => {
+            console.log('This is the charge');
+
+            console.log({
+                uid: uid,
+                servicesSelected: servicesSelected,
+                fillAmount: fillAmount,
+                servicesCosts: {
+                    windshield: windshieldCost * 100,
+                    tireCost: tireCost * 100,
+                    topUpCost: topUpCost * 100,
+                    total: total * 100
+                },
+                charge: {
+                    chargeSource: 'card_1ClJpVBynFeLvZKLI9XP39eq',
+                    chargeDescription: 'Sure Fuel App Order',
+                    chargeAmount: 500000,
+                    isChargeAuth: false,
+                    chargeServiceFee: 2000
+                },
+                octane: octane,
+                octanePrice: octanePrice,
+                route: {
+                    coordinates: {
+                        name: uid,
+                        lat: lat,
+                        lng: lng,
+                    },
+                    start: start,
+                    end: end,
+                    duration: 15,
+                    load: approximateLoad
+                },
+                driver: null,
+            });
+
+            const ref = firestore.collection('jobs').doc('calgary').collection('jobs').doc();
+            console.log(ref.id)  // prints the unique id
+            ref.set({
+                    customerUid: uid,
+                    timestamp: Date.now(),
+                    servicesSelected: servicesSelected,
+                    fillAmount: fillAmount,
+                    servicesCosts: {
+                        windshield: windshieldCost * 100,
+                        tireCost: tireCost * 100,
+                        topUpCost: topUpCost * 100,
+                        total: total * 100
+                    },
+                    charge: {
+                        chargeSource: 'card_1ClJpVBynFeLvZKLI9XP39eq',
+                        chargeDescription: 'Sure Fuel App Order',
+                        chargeAmount: total * 100,
+                        isChargeAuth: false,
+                        chargeServiceFee: 2000
+                    },
+                    octane: octane,
+                    octanePrice: octanePrice,
+                    routing: {
+                        location: {
+                            name: ref.id,
+                            lat: lat,
+                            lng: lng,
+                        },
+                        start: start,
+                        end: end,
+                        duration: 15,
+                        load: approximateLoad
+                    },
+                    driverId: null,
+                    cancelled: false,
+                    chargeCaptured: false,
+                    authorized: false,
+                })
+                .then((docRef) => {
+                    console.log(docRef);
+                    NavigationService.navigate('Home');
+                });
+        }
+    },
+    createDriver: (object) => {
+        console.log('create driver');
+        firestore.collection('drivers').doc('calgary').collection('activeDrivers').add(object)
+            .then((docRef) => {
+                console.log(docRef);
+                NavigationService.navigate('Home');
+            });
+
     },
 
 }

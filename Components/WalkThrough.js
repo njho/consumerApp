@@ -36,6 +36,10 @@ export default class WalkThrough extends React.Component {
         header: null,
         drawerLabel: 'WalkThrough'
     };
+
+    componentWillMount() {
+        console.log('walkthrough');
+    }
     onSkipBtnHandle = (index) => {
         Alert.alert('Skip');
         console.log(index);

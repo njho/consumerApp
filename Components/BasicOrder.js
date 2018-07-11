@@ -64,6 +64,9 @@ const mapDispatchToProps = dispatch => ({
     },
     setRates: (value) => {
         dispatch({type: 'SET_RATES', value: value});
+    },
+    setCoordinates: (lat, lng) => {
+        dispatch({type: 'SET_COORDINATES', lat: lat, lng: lng});
     }
 });
 
@@ -137,6 +140,8 @@ class BasicOrder extends React.Component {
                 duration: 150,
             }
         ).start();
+        this.props.setCoordinates(event.latitude, event.longitude);
+
 
         let cat = 0;
 
@@ -145,8 +150,11 @@ class BasicOrder extends React.Component {
             if (inside([event.latitude, event.longitude], element.poly.map(c => [c.latitude, c.longitude]))) {
                 cat = 1;
                 this.props.setRates(element);
+                console.log('inside');
+                console.log(event);
+
             } else {
-                if(cat === 1) {
+                if (cat === 1) {
 
                 } else {
                     cat = 0;

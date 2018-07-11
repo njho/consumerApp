@@ -5,6 +5,7 @@ const defaultState = {
     firstName: null,
     lastName: null,
     phoneNumber: null,
+    userMeta : {},
 
     userInfoUpdated: false,
     vehicles: [],
@@ -57,6 +58,11 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 creditCards: action.value
+            };
+        case 'SET_USER_META':
+            return {
+                ...state,
+                userMeta: action.value
             };
     }
 

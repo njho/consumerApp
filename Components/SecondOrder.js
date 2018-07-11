@@ -1,19 +1,10 @@
 import React from 'react';
-import {StyleSheet, Platform, Image, Text, View, Button, TouchableOpacity, Dimensions, FlatList} from 'react-native';
+import {StyleSheet, KeyboardAvoidingView, Image, Text, View, Button, TouchableOpacity, Dimensions, FlatList} from 'react-native';
 import update from 'immutability-helper';
 
 
 import {connect} from 'react-redux';
-
-
-import MapView from 'react-native-maps';
-import Interactable from 'react-native-interactable';
 import Icon from 'react-native-vector-icons/Ionicons';
-import ServiceListItem from './ServiceListItem'
-
-
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
 
 
 const height = Dimensions.get('window').height;
@@ -73,21 +64,6 @@ class SecondOrder extends React.Component {
         })
     }
 
-    gasSelection = (value) => {
-        this.interactable.snapTo({index: 1});
-        this.props.octaneSelected(value);
-    };
-
-    pickerToggled(uid, value) {
-        var newArray = [];
-        if (value) {
-            newArray = update(this.props.selected, {$push: [uid]});
-        } else {
-            // newArray = this.props.selected.filter(e => e !== uid);
-            // console.log(this.props.selected);
-        }
-    };
-
     renderImage(index) {
         console.log(index);
         switch (index) {
@@ -125,72 +101,73 @@ class SecondOrder extends React.Component {
 
     render() {
         return (
-            <View style={styles.container}>
 
-                <View style={styles.header}>
-                    <View style={{flexDirection: 'row', marginBottom: 10}}>
+            <KeyboardAvoidingView keyboardVerticalOffset={100} style={styles.avoidingView}
+                                  contentContainerStyle={{paddingBottom: 5}} enabled>
+                <View style={styles.container}>
 
-                        <TouchableOpacity style={{marginRight: 20,}} onPress={() => this.props.navigation.goBack()}>
-                            <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
-                        </TouchableOpacity>
+                    <View style={styles.header}>
 
+                        <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
+                            <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                                <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
+                            </TouchableOpacity>
+                        </View>
                         <Text style={styles.headerTitle}>Additional Services</Text>
                     </View>
+                    <FlatList
+                        style={{flex: 1, width: width, }}
+                        data={this.state.services}
+                        keyExtractor={(item, i) => String(i)}
+                        renderItem={({item, index}) =>
+                            <TouchableOpacity
+                                onPress={() => this.serviceSelection(index)}
+                                key={index} style={styles.serviceContainer}>
 
-                    <Text style={styles.contentText}>Please choose from additional Sure Fuel services.</Text>
+                                {this.props.servicesSelected[index] ? <View style={{
+                                        width: width * 0.17,
+                                        marginRight: 10,
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}><Icon name="ios-checkmark" size={60} color={'#91a3ff'}/></View>
+                                    : this.renderImage(index)}
+
+
+                                <View style={styles.titleContainer}>
+                                    <Text style={[styles.promotionText, {color: '#91a3ff'}]}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style={[styles.promotionText, {
+                                        color: '#bccaff',
+                                        fontWeight: 'normal',
+                                        fontSize: 12,
+                                        textDecorationLine: 'none',
+                                        marginTop: 2
+                                    }]}>
+                                        {item.description}
+                                    </Text>
+                                </View>
+
+                                <View style={styles.priceMarker}>
+                                    <Text style={[{
+                                        fontSize: 12,
+                                        textDecorationLine: 'none',
+                                        fontWeight: 'normal',
+                                        color: 'white',
+                                    }]}>
+                                        ${item.price}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        }
+                    />
+                    <TouchableOpacity onPress={()=>this.props.navigation.navigate('OrderSummary')} style={{marginBottom: 20, marginTop: 10}}>
+                        <Text style={{color: '#91a3ff', fontSize: 18, fontWeight: 'bold'}}>CONTINUE</Text>
+                    </TouchableOpacity>
 
                 </View>
-                <FlatList
-                    style={{flex: 1, width: width, backgroundColor: '#91a3ff'}}
-                    data={this.state.services}
-                    keyExtractor={this._keyExtractor}
-                    renderItem={({item, index}) =>
-                        <TouchableOpacity
-                            onPress={() => this.serviceSelection(index)}
-                            key={index} style={styles.serviceContainer}>
+            </KeyboardAvoidingView>
 
-                            {this.props.servicesSelected[index] ? <View style={{
-                                    width: width * 0.17,
-                                    marginRight: 10,
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}><Icon name="ios-checkmark" size={60} color={'white'}/></View>
-                                : this.renderImage(index)}
-
-
-                            <View style={styles.titleContainer}>
-                                <Text style={[styles.promotionText, {color: 'white'}]}>
-                                    {item.title}
-                                </Text>
-                                <Text style={[styles.promotionText, {
-                                    color: 'white',
-                                    fontWeight: 'normal',
-                                    fontSize: 12,
-                                    textDecorationLine: 'none',
-                                    marginTop: 2
-                                }]}>
-                                    {item.description}
-                                </Text>
-                            </View>
-
-                            <View style={styles.priceMarker}>
-                                <Text style={[{
-                                    fontSize: 12,
-                                    textDecorationLine: 'none',
-                                    fontWeight: 'normal',
-                                    color: 'white',
-                                }]}>
-                                    ${item.price}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    }
-                />
-                <TouchableOpacity onPress={()=>this.props.navigation.navigate('OrderSummary')} style={{marginBottom: 20, marginTop: 10}}>
-                    <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>CONTINUE</Text>
-                </TouchableOpacity>
-
-            </View>
 
 
 
@@ -205,22 +182,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        backgroundColor: '#91a3ff'
+        backgroundColor: 'white'
     },
     header: {
         width: width,
-        paddingTop: 20,
-        paddingBottom: 10,
+        paddingTop: 65,
+        paddingBottom: 25,
         paddingHorizontal: 30,
-        justifyContent: 'flex-start',
-        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        backgroundColor: '#91a3ff'
     },
     headerTitle: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: 25,
-        borderTopRightRadius: 5,
-        borderTopLeftRadius: 5
+        fontSize: 25
     },
     content: {
         alignItems: 'flex-start',
@@ -284,6 +259,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         fontSize: 18,
-    }
+    },
+    avoidingView: {
+        flex: 1,
+    },
+
 });
 

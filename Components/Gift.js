@@ -11,20 +11,21 @@ import {
     TouchableOpacity,
     Dimensions
 } from 'react-native';
-import MapView from 'react-native-maps';
-import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
-
+import {connect} from 'react-redux';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 
-export default class Gift extends React.Component {
+const mapStateToProps = state => ({
+    userMeta: state.auth.userMeta,
+});
+
+const mapDispatchToProps = dispatch => ({
+});
+
+class Gift extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -37,7 +38,6 @@ export default class Gift extends React.Component {
         drawerLabel: 'Gift With SureFuel',
         drawerIcon: ({tintColor}) => (
             <Icon name="ios-bowtie" size={25} color={tintColor}/>
-
         ),
 
     };
@@ -50,7 +50,7 @@ export default class Gift extends React.Component {
                 <View style={styles.container}>
 
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Hello, Adam</Text>
+                        <Text style={styles.headerTitle}>Hello, {this.props.userMeta.firstName}</Text>
                     </View>
                     <View style={styles.content}>
                         <Text style={styles.contentText}>The team at Sure Fuel appreciates your commitment to our brand!</Text>
@@ -88,6 +88,7 @@ export default class Gift extends React.Component {
             ;
     }
 }
+export default connect(mapStateToProps, mapDispatchToProps)(Gift);
 
 const styles = StyleSheet.create({
     avoidingView: {

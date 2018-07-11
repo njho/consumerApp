@@ -23,7 +23,8 @@ const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 const mapStateToProps = state => ({
-    loginState: state.common.loginState
+    loginState: state.common.loginState,
+    firstNavigation: state.common.firstNavigation
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -32,6 +33,9 @@ const mapDispatchToProps = dispatch => ({
     },
     setUser: (value) => {
         dispatch({type: 'SET_USER', value: value});
+    },
+    getUser: (uid) => {
+        dispatch(agent.getters.getUserMeta(uid));
     }
 });
 
@@ -50,6 +54,14 @@ class Loading extends React.Component {
             await  AsyncStorage.setItem('firstLoad', 'load');
         } catch (error) {
             // Error saving data
+        }
+    };
+
+    componentWillReceiveProps(nextProps) {
+        console.log('nextPros');
+        console.log(nextProps);
+        if(nextProps.firstNavigation != this.props.firstNavigation) {
+            this.props.navigation.navigate(nextProps.firstNavigation);
         }
     }
 
@@ -70,13 +82,19 @@ class Loading extends React.Component {
                     console.log("This is the user.email: " + user.email);
                     console.log("This is the user Creation Time: " + user.metadata.creationTime);
 
-                    //ASSUME THAT THIS IS AN INITIAL USER
-                    agent.setters.setInitialUser(user.uid, user.email, user.metadata.creationTime);
-                    this.props.setUser(user);
+                    // //ASSUME THAT THIS IS AN INITIAL USER
+                    // agent.setters.setInitialUser(user.uid, user.email, user.metadata.creationTime);
+                    // this.props.setUser(user);
+
+                    this.props.getUser(user.uid);
                     this.storeData().then(() => this.props.navigation.navigate('WalkThrough'));
                 } else {
+                    console.log('in else');
+                    console.log(user.uid);
+                    this.props.getUser(user.uid);
+
                     this.props.setUser(user);
-                    this.props.navigation.navigate('OrderSummary')
+                    // this.props.navigation.navigate('OrderSummary')
                     // this.props.navigation.navigate('Home')
                 }
             } else {
@@ -85,7 +103,7 @@ class Loading extends React.Component {
 
             }
         });
-        // this.props.navigation.navigate('EditVehicle')
+        // this.props.navigation.navigate('WalkThrough')
 
     }
 

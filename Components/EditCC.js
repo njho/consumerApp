@@ -60,6 +60,7 @@ class EditCC extends React.Component {
     saveVehicle(isNew) {
         console.log(this.state);
         console.log(this.props.creditCardDocId);
+        console.log(isNew);
 
         if(isNew && this.state.valid) {
             agent.actions.createStripeCustomer({
@@ -68,7 +69,7 @@ class EditCC extends React.Component {
                 exp_year: this.state.exp_year,
                 cvc: this.state.cvc,
             });
-        } else if(this.state.valid) {
+        } else if(this.state.valid && !isNew) {
             agent.actions.updateStripeCustomer({
                 uid: this.props.user.uid,
                 number: this.state.number,

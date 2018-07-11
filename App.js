@@ -16,7 +16,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import NavigationService from './Helpers/NavigationService';
 
 
-
 import BasicOrder from './Components/BasicOrder';
 import Loading from './Components/Loading';
 import Settings from './Components/Settings'
@@ -77,9 +76,11 @@ class App extends React.Component {
     }
 }
 
-const AppStack = StackNavigator({
-    BasicOrder: BasicOrder,
-    WalkThrough: WalkThrough
+const WalkThroughStack = StackNavigator({
+
+    WalkThrough: WalkThrough,
+    InitialDetails: InitialDetails,
+
 });
 const AuthStack = StackNavigator({
     Loading: Loading,
@@ -131,7 +132,7 @@ const Navigator = new SwitchNavigator(
     {
         App: drawerNav,
         Loading: AuthStack,
-        InitialDetails: InitialDetails
+        WalkThrough: WalkThroughStack
     },
     {
         initialRouteName: 'Loading',
