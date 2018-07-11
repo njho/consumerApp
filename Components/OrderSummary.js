@@ -319,7 +319,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
 
     },
-
     promotionText: {
         alignItems: 'flex-start',
         color: '#91a3ff',

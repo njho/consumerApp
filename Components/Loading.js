@@ -103,7 +103,7 @@ class Loading extends React.Component {
 
             }
         });
-        // this.props.navigation.navigate('WalkThrough')
+        // this.props.navigation.navigate('Orders');
 
     }
 

@@ -6,6 +6,7 @@ const defaultState = {
     lastName: null,
     phoneNumber: null,
     userMeta : {},
+    userJobs: [],
 
     userInfoUpdated: false,
     vehicles: [],
@@ -63,6 +64,11 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 userMeta: action.value
+            };
+        case 'SET_USER_JOBS':
+            return {
+                ...state,
+                userJobs: action.value
             };
     }
 

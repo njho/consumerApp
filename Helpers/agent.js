@@ -116,6 +116,29 @@ const getters = {
             })
         }
     },
+    getUserJobs: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('jobs').onSnapshot(querySnapshot => {
+                let array = [];
+                querySnapshot.forEach(function (doc) {
+                    console.log(doc.id);
+                    array.push({
+                        ...doc.data(),
+                        jobId: doc.id,
+                        timestamp: doc.data().timestamp
+                    });
+                });
+                console.log(array);
+                dispatch({
+                    type: 'SET_USER_JOBS',
+                    value: array
+                });
+            })
+        }
+    },
+    getJobInformation: (jobId) => {
+        return firestore.collection('jobs').doc('calgary').collection('jobs').doc(jobId)
+    },
     getUserCreditCards: (uid) => {
         return dispatch => {
             firestore.collection('users').doc(uid).collection('creditCards').onSnapshot(querySnapshot => {
@@ -297,6 +320,17 @@ const actions = {
                 .then((docRef) => {
                     console.log(docRef);
                     NavigationService.navigate('Home');
+                });
+        }
+    },
+    cancelOrder: (jobId) => {
+        return dispatch => {
+            console.log('cancel the order')
+
+            const ref = firestore.collection('jobs').doc('calgary').collection('jobs').doc(jobId).set({cancelled: true}, {merge: true})
+                .then((docRef) => {
+                    console.log(docRef);
+                    NavigationService.navigate('Orders');
                 });
         }
     },

@@ -50,6 +50,9 @@ const mapDispatchToProps = dispatch => ({
     getUserDetails: (uid) => {
         dispatch(agent.getters.getUser(uid))
     },
+    getUserJobs: (uid) => {
+        dispatch(agent.getters.getUserJobs(uid))
+    },
     getuserVehicles: (uid) => {
         dispatch(agent.getters.getUserVehicles(uid))
     },
@@ -94,6 +97,8 @@ class BasicOrder extends React.Component {
         this.props.getUserDetails(this.props.user.uid);
         this.props.getuserVehicles(this.props.user.uid);
         this.props.getUserCreditCards(this.props.user.uid);
+        this.props.getUserJobs(this.props.user.uid);
+
         this.props.resetAllOrderInfo();
         this.props.getZones('calgary');
 

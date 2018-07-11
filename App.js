@@ -27,6 +27,7 @@ import Gift from './Components/Gift';
 import OrderSummary from './Components/OrderSummary';
 import Vehicles from './Components/Vehicles';
 import EditVehicle from './Components/EditVehicle';
+import ActiveOrders from './Components/ActiveOrders';
 
 import CreditCards from './Components/CreditCards';
 import EditCC from './Components/EditCC';
@@ -112,6 +113,7 @@ const drawerNav = createDrawerNavigator({
             drawerIcon: ({tintColor}) => <Icon name="ios-home" size={25} color={tintColor}/>
         }
     },
+    Orders: ActiveOrders,
     Gift: Gift,
     // WalkThrough: WalkThrough,
     Settings: {

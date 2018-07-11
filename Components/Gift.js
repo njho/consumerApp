@@ -35,7 +35,7 @@ class Gift extends React.Component {
 
     static navigationOptions = {
         header: null,
-        drawerLabel: 'Gift With SureFuel',
+        drawerLabel: 'Give 7 Receive 7',
         drawerIcon: ({tintColor}) => (
             <Icon name="ios-bowtie" size={25} color={tintColor}/>
         ),

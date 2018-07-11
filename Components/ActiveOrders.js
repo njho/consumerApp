@@ -7,75 +7,47 @@ import {
     Text,
     ScrollView,
     TextInput,
+    FlatList,
     View,
     Button,
     TouchableOpacity,
     Dimensions
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {ListItem, List,} from 'react-native-elements';
 import {connect} from 'react-redux';
+
+import OrderListComponent from './OrderListComponent';
+
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 
-const emptyObject = {
-    make: 'AC',
-    model: 'Ace',
-    color: 'Red',
-    year: 2018,
-    license: '',
-    octane: 'Regular'
-};
-
 const mapStateToProps = state => ({
-    user: state.auth.user,
-    email: state.auth.email,
-    firstName: state.auth.firstName,
-    lastName: state.auth.lastName,
-    phoneNumber: state.auth.phoneNumber,
+    userMeta: state.auth.userMeta,
+    userJobs: state.auth.userJobs
 
-    userInfoUpdated: state.auth.userInfoUpdated,
-    vehicles: state.auth.vehicles
 });
 
 const mapDispatchToProps = dispatch => ({
-    setEditVehicle: (value) => {
-        dispatch({type: 'SET_EDIT_VEHICLE', value: value});
-    },
+
 });
 
-class Vehicles extends React.Component {
+class ActiveOrders extends React.Component {
     constructor() {
         super();
-        this.state = {
-            // firebase things?
-        };
+
     }
 
     static navigationOptions = {
         header: null,
-        drawerLabel: 'Settings',
+        drawerLabel: 'Orders',
         drawerIcon: ({tintColor}) => (
-            <Icon name="ios-cog" size={25} color={tintColor}/>
+            <Icon name="ios-radio-button-on" size={25} color={tintColor}/>
 
         ),
 
     };
-
-    navigateToRoute = (item) => {
-        if (item === null) {
-            this.props.setEditVehicle(emptyObject);
-            this.props.navigation.navigate('EditVehicle', {isNew: true})
-        } else {
-            console.log('is not new');
-            console.log(item);
-            this.props.setEditVehicle(item);
-            this.props.navigation.navigate('EditVehicle', {isNew: false})
-        }
-    };
-
 
     render() {
         return (
@@ -84,41 +56,21 @@ class Vehicles extends React.Component {
                 <View style={styles.container}>
 
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Your Vehicles</Text>
+                        <Text style={styles.headerTitle}>Your Orders</Text>
                     </View>
                     <ScrollView>
-                    <List containerStyle={{marginTop: 0}}>
-                        {
-                            this.props.vehicles.map((item, i) => (
-                                <ListItem
-                                    key={i}
-                                    leftAvatar={{source: {uri: item.avatar_url}}}
-                                    title={item.title}
-                                    subtitle={item.subtitle}
-                                    subtitleNumberOfLines={2}
-                                    containerStyle={{paddingTop: 20, paddingBottom: 20,}}
-                                    titleStyle={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}
-                                    subtitleContainerStyle={{paddingRight: 20}}
-                                    onPress={() => this.navigateToRoute(item)}
-                                    leftIcon={{
-                                        name: 'directions-car',
-                                        size: 35,
-                                        color: '#91a3ff',
-                                        style: {marginRight: 20, marginLeft: 10,}
-                                    }}
-                                />
-                            ))
-                        }
-                    </List>
+                        <FlatList
+                            style={{flex: 1, width: width,}}
+                            data={this.props.userJobs}
+                            keyExtractor={(item, i) => String(i)}
+                            renderItem={({item, index}) =>
+                              <OrderListComponent index={index} item={item}/>
+                            }
+                        />
                     </ScrollView>
-                    <TouchableOpacity style={styles.titleView}
-                                      onPress={() => this.navigateToRoute(null)}>
-                        <Icon name="ios-add-circle-outline" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
-                        <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Add A New Vehicle</Text>
-                    </TouchableOpacity>
                     <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
-                        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-                            <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
+                        <TouchableOpacity onPress={() => this.props.navigation.toggleDrawer()}>
+                            <Icon name="ios-menu" size={35} color={'rgba(255,255,255,0.9)'}/>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -129,7 +81,7 @@ class Vehicles extends React.Component {
     }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Vehicles);
+export default connect(mapStateToProps, mapDispatchToProps)(ActiveOrders);
 
 
 const styles = StyleSheet.create({
@@ -176,7 +128,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderBottomColor: '#bbb',
         borderBottomWidth: 1
+    },
+    orderContainer: {
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        alignSelf: 'flex-start',
+        flex: 1,
+        width: width,
+    },
+    orderTitle: {
+        fontWeight: 'bold',
+        fontSize: 18
     }
-
 });
 
