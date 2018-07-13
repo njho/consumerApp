@@ -1,10 +1,11 @@
 const defaultState = {
-    octane: null,
-    make: null,
-    model: null,
-    year: null,
+    octane: 'Regular',
+    make: 'AC',
+    model: 'Ace',
+    year: 2018,
     license: null,
     docId: null,
+    color: 'Red',
 
     creditCardDocId: null,
 };

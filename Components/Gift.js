@@ -5,14 +5,16 @@ import {
     Platform,
     Image,
     Text,
-    TextInput,
+    Share,
     View,
     Button,
     TouchableOpacity,
+    ActivityIndicator,
     Dimensions
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {connect} from 'react-redux';
+import agent from '../Helpers/agent';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
@@ -20,9 +22,13 @@ const width = Dimensions.get('window').width;
 
 const mapStateToProps = state => ({
     userMeta: state.auth.userMeta,
+    user: state.auth.user
 });
 
 const mapDispatchToProps = dispatch => ({
+    generateCode: (uid) => {
+        dispatch(agent.actions.generateCode(uid));
+    },
 });
 
 class Gift extends React.Component {
@@ -42,6 +48,31 @@ class Gift extends React.Component {
 
     };
 
+    async generateCodeAsync(uid) {
+        let response = await agent.actions.generateCodeAsync(uid);
+        console.log(response);
+        let data = await response.json();
+        return data;
+    }
+
+    generateCode = (uid) => {
+        this.setState({...this.state, loading: true});
+        // let response = await agent.actions.generateCode(uid);
+
+        // this.props.generateCode(uid);
+        this.generateCodeAsync(uid).then((response) => {
+            console.log('this is the response + ' + response);
+            this.setState({...this.state, loading: false});
+
+            Share.share(
+                {
+                    message: `I love never having to go to the gas station with the Sure Fuel App!\n\n If you order fuel with this code, we both get $7 off our purchase! \n \nCode: ${response}`
+                }).then(result => console.log(result)).catch(errorMsg => console.log(errorMsg));
+        })
+
+
+    };
+
 
     render() {
         return (
@@ -53,18 +84,24 @@ class Gift extends React.Component {
                         <Text style={styles.headerTitle}>Hello, {this.props.userMeta.firstName}</Text>
                     </View>
                     <View style={styles.content}>
-                        <Text style={styles.contentText}>The team at Sure Fuel appreciates your commitment to our brand!</Text>
+                        <Text style={styles.contentText}>The team at Sure Fuel appreciates your commitment to our
+                            brand!</Text>
                         <Text style={[styles.contentText, {
                             fontSize: 17,
                             fontWeight: 'normal',
                             marginTop: 10,
                             marginRight: 15,
-                        }]}>We're currently offering the following promotion to help you share with the ones you love</Text>
+                        }]}>We're currently offering the following promotion to help you share with the ones you
+                            love</Text>
 
-                        <TouchableOpacity style={styles.promotionContainer}>
-                                <Icon style={{position: 'absolute', top: 15, right: 20}} name="ios-heart" size={30} color={'white'}/>
+                        <TouchableOpacity style={styles.promotionContainer}
+                                          onPress={() => this.generateCode(this.props.user.uid)}>
+                            {this.state.loading ? <ActivityIndicator style={{position: 'absolute', top: 15, right: 20}} size="large" color="#7AFF9A"/>
+                                : <Icon style={{position: 'absolute', top: 15, right: 20}} name="ios-heart" size={30}
+                                        color={'white'}/>}
+
                             <Text style={styles.promotionText}>
-                                SureFuel 7 for 7
+                                {!this.state.loading ? 'SureFuel 7 for 7' : 'Generating Your Code'}
                             </Text>
                             <Text style={[styles.promotionText, {
                                 fontSize: 17,
@@ -88,6 +125,7 @@ class Gift extends React.Component {
             ;
     }
 }
+
 export default connect(mapStateToProps, mapDispatchToProps)(Gift);
 
 const styles = StyleSheet.create({

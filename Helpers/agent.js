@@ -97,10 +97,9 @@ const getters = {
                 if (!doc.exists) {
                     return null
                 } else {
-
                     let firstNavigation;
                     console.log('Document data:', doc.data());
-                    if (typeof (doc.data().walkthroughCompleted) === 'undefined') {
+                    if (typeof (doc.data().walkthroughCompleted) === 'undefined' || doc.data().walkthroughCompleted === false) {
                         firstNavigation = 'WalkThrough';
                     } else if (typeof doc.data().firstName === 'undefined' && typeof doc.data().lastName === 'undefined' && typeof doc.data().phone === 'undefined' && typeof doc.data().email === 'undefined' && typeof doc.data().walkthroughCompleted !== 'undefined') {
                         firstNavigation = 'InitialDetails';
@@ -116,9 +115,23 @@ const getters = {
             })
         }
     },
+    getPaymentInfo: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('paymentInfo').doc('stripeInformation').get().then(doc => {
+                if (!doc.exists) {
+                    return null
+                } else {
+                    dispatch({
+                        type: 'SET_USER_PAYMENT',
+                        value: doc.data(),
+                    });
+                }
+            })
+        }
+    },
     getUserJobs: (uid) => {
         return dispatch => {
-            firestore.collection('users').doc(uid).collection('jobs').onSnapshot(querySnapshot => {
+            firestore.collection('users').doc(uid).collection('jobs').orderBy('timestamp', 'desc').onSnapshot(querySnapshot => {
                 let array = [];
                 querySnapshot.forEach(function (doc) {
                     console.log(doc.id);
@@ -166,9 +179,10 @@ const getters = {
                 let array = [];
                 querySnapshot.forEach(function (doc) {
                     console.log(doc.id);
+                    //                        id: doc.id,
+
                     array.push({
                         ...doc.data(),
-                        id: doc.id,
                     });
                 });
                 dispatch({
@@ -236,7 +250,7 @@ const actions = {
                 });
         }
     },
-    sendVehicleInformation: (uid, vehicleObject, isNew, docId) => {
+    sendVehicleInformation: (uid, vehicleObject, isNew, docId, redirect) => {
         return dispatch => {
             console.log(isNew);
             console.log(vehicleObject);
@@ -245,8 +259,16 @@ const actions = {
             if (isNew) {
                 firestore.collection('users').doc(uid).collection('vehicles').add(vehicleObject)
                     .then((docRef) => {
+
+                        console.log('This is the value of redirect => ' + redirect);
                         console.log(docRef.id)
-                        NavigationService.navigate('Settings');
+                        if (redirect) {
+                            NavigationService.navigate('OrderSummary');
+
+                        } else if (redirect === null || typeof redirect === 'undefined' || redirect === 'undefined') {
+                            NavigationService.navigate('Settings');
+
+                        }
                     });
             } else {
                 firestore.collection('users').doc(uid).collection('vehicles').doc(docId).set(vehicleObject)
@@ -283,9 +305,9 @@ const actions = {
 
         }
     },
-    createStripeCustomer: (body) => {
+    createStripeCustomer: (body, redirect) => {
         console.log(body);
-
+        console.log(redirect);
         return fetch('https://us-central1-surefuelapp.cloudfunctions.net/createCustomerAccount', {
             method: 'POST',
             headers: {
@@ -293,7 +315,19 @@ const actions = {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(body)
-        }).then((response => console.log(response)))
+        }).then((response => {
+                console.log(response);
+
+                if (redirect) {
+                    NavigationService.navigate('OrderSummary');
+
+                } else {
+                    NavigationService.navigate('Settings');
+
+                }
+            }
+
+        ))
     },
     updateStripeCustomer: (body) => {
         console.log(body);
@@ -334,7 +368,7 @@ const actions = {
                 });
         }
     },
-    createOrder: (fillAmount, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshieldCost, tireCost, topUpCost, lat, lng, uid, total) => {
+    createOrder: (fillAmount, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshieldCost, tireCost, topUpCost, lat, lng, uid, total, stripeInformation, vehicleInfo) => {
         return dispatch => {
             console.log('This is the charge');
 
@@ -369,6 +403,9 @@ const actions = {
                     load: approximateLoad
                 },
                 driver: null,
+                vehicle: vehicleInfo,
+                paymentInfo: stripeInformation
+
             });
 
             const ref = firestore.collection('jobs').doc('calgary').collection('jobs').doc();
@@ -407,7 +444,9 @@ const actions = {
                     driverId: null,
                     cancelled: false,
                     chargeCaptured: false,
-                    authorized: false,
+                    vehicle: vehicleInfo,
+                    paymentInfo: stripeInformation,
+                    driverStatus: null
                 })
                 .then((docRef) => {
                     console.log(docRef);
@@ -423,6 +462,49 @@ const actions = {
                 NavigationService.navigate('Home');
             });
 
+    },
+    generateCode: (uid) => {
+        return dispatch => {
+            console.log('This is the Uid from generateCode' + uid);
+            return fetch('https://us-central1-surefuelapp.cloudfunctions.net/generateCode\n', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    issuer: uid,
+                    receiver: null,
+                    timestamp: Date.now(),
+                    type: '7for7',
+                    status: 'new'
+                })
+            }).then((response => {
+                    console.log(response);
+                    dispatch({
+                        type: 'SET_SHARE_CODE',
+                        value: response
+                    });
+                }
+            ));
+        }
+
+    },
+    generateCodeAsync: async function (uid) {
+        return fetch('https://us-central1-surefuelapp.cloudfunctions.net/generateCode\n', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                issuer: uid,
+                receiver: null,
+                timestamp: Date.now(),
+                type: '7for7',
+                status: 'new'
+            })
+        });
     },
 
 }

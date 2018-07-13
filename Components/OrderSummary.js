@@ -14,6 +14,10 @@ const width = Dimensions.get('window').width;
 
 const mapStateToProps = state => ({
     user: state.auth.user,
+    creditCards: state.auth.creditCards,
+    orderVehicle: state.common.orderVehicle,
+    paymentInfo: state.auth.userPayment,
+    vehicles: state.auth.vehicles,
 
     servicesSelected: state.common.servicesSelected,
     windshield: state.common.windshield,
@@ -36,9 +40,12 @@ const mapDispatchToProps = dispatch => ({
     confirmOrder: (uid, cardId) => {
         dispatch(agent.actions.createCharge(uid, cardId));
     },
-    createOrder: (orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total) => {
-        dispatch(agent.actions.createOrder(orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total));
-    }
+    createOrder: (orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle) => {
+        dispatch(agent.actions.createOrder(orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle));
+    },
+    setOrderVehicle: (value) => {
+        dispatch({type: 'SET_ORDER_VEHICLE', value: value});
+    },
 });
 
 class OrderSummary extends React.Component {
@@ -56,7 +63,7 @@ class OrderSummary extends React.Component {
 
 
     calculateTotal = () => {
-        let total = this.props.orderFill + this.props.servicesSelected[0] * this.props.topUp + this.props.servicesSelected[1] * this.props.windshield + this.props.servicesSelected[2] * this.props.tire
+        let total = this.props.orderFill + this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.chip * this.props.windshield + this.props.servicesSelected.tire * this.props.tire;
         console.log('This is the total ' + total);
         return total
     };
@@ -77,30 +84,24 @@ class OrderSummary extends React.Component {
             octanePrice = this.props.premium;
         }
 
-        let approximateLoad = (this.props.orderFill - (this.props.servicesSelected[0] * this.props.topUp + this.props.servicesSelected[1] * this.props.windshield + this.props.servicesSelected[2] * this.props.tire)) / octanePrice;
+        let approximateLoad = ((this.props.orderFill - (this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.windshield * this.props.windshield + this.props.servicesSelected.tire * this.props.tire)) * 0.95 - 5) / octanePrice;
 
-        this.props.createOrder(this.props.orderFill, this.props.octane, octanePrice, approximateLoad, currentTime.toString(), end.toString(), this.props.orderHour, this.props.servicesSelected, this.props.windshield, this.props.tire, this.props.topUp, this.props.lat, this.props.lng, this.props.user.uid, this.calculateTotal());
-        // this.props.confirmOrder('test', 'test');
+        this.props.createOrder(this.props.orderFill, this.props.octane, octanePrice, approximateLoad, currentTime.toString(), end.toString(), this.props.orderHour, this.props.servicesSelected, this.props.windshield, this.props.tire, this.props.topUp, this.props.lat, this.props.lng, this.props.user.uid, this.calculateTotal(), this.props.paymentInfo, this.props.orderVehicle);
     };
 
-    // componentDidMount() {
-    //     const vehicles =
-    //         {
-    //             id: "vehicle_1",
-    //             start_location: {
-    //                 id: "depot",
-    //                 lat: 51.091617,
-    //                 lng: -113.960600
-    //             },
-    //             end_location: {
-    //                 id: "depot",
-    //                 lat: 51.091617,
-    //                 lng: -113.960600
-    //             }
-    //         }
-    //     agent.actions.createDriver(vehicles)
-    //
-    // }
+    componentWillMount() {
+        console.log(this.props.orderVehicle);
+        console.log(this.props.creditCards);
+        if (this.props.creditCards.length === 1) {
+            console.log('There is a default Credit Card Already');
+            if(this.props.vehicles.length === 1) {
+                console.log(this.props.vehicles)
+                this.props.setOrderVehicle(this.props.vehicles[0]);
+            }
+        } else if (this.props.creditCards.length === 0) {
+            this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
+        }
+    }
 
     render() {
         return (
@@ -115,6 +116,20 @@ class OrderSummary extends React.Component {
                 </View>
                 <View style={styles.serviceContainer}>
                     <ScrollView contentContainerStyle={{alignItems: 'center', paddingTop: 30, paddingBottom: 40,}}>
+                        <View style={styles.headerContent}>
+                            <View style={styles.headerBox}>
+                                <Icon name="ios-car-outline" color={'white'} size={40}/>
+                                <Text style={{color: 'white', fontSize: 12,}}>{this.props.orderVehicle !== {} || typeof (this.props.orderVehicle ) !== 'undefined' ? this.props.orderVehicle.license : null}</Text>
+                            </View>
+                            <View style={styles.headerBox}>
+                                <Icon name="ios-card-outline" color={'white'} size={40}/>
+                                <Text style={{
+                                    color: 'white',
+                                    fontSize: 12,
+                                }}>{this.props.creditCards.length > 0 ? this.props.creditCards[0].number : null}</Text>
+
+                            </View>
+                        </View>
                         <View style={styles.serviceItem}>
                             <View>
                                 <Text style={styles.serviceTitle}>FILL</Text>
@@ -133,7 +148,7 @@ class OrderSummary extends React.Component {
                             </View>
                         </View>
 
-                        {this.props.servicesSelected[0] ? <View style={styles.serviceItemContainer}>
+                        {this.props.servicesSelected['windshieldTopUp'] ? <View style={styles.serviceItemContainer}>
                             <View style={styles.serviceItem}>
                                 <View style={{flex: 1}}>
                                     <Text style={styles.serviceTitle}>WINDSHIELD WASHER FLUID TOP-UP</Text>
@@ -152,7 +167,7 @@ class OrderSummary extends React.Component {
                             </View>
                         </View> : null}
 
-                        {this.props.servicesSelected[1] ?
+                        {this.props.servicesSelected['chip'] ?
                             <View style={styles.serviceItemContainer}>
                                 <View style={styles.serviceItem}>
                                     <View>
@@ -182,7 +197,7 @@ class OrderSummary extends React.Component {
                             </View>
                             : null}
 
-                        {this.props.servicesSelected[2] ?
+                        {this.props.servicesSelected['tire'] ?
 
                             <View style={styles.serviceItemContainer}>
                                 <View style={styles.serviceItem}>
@@ -276,6 +291,24 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 25
     },
+    headerContent: {
+        flexDirection: 'row',
+        width: width * 0.7,
+        flex: 1,
+        justifyContent: 'space-around',
+        paddingBottom: 25,
+
+    },
+    headerBox: {
+        backgroundColor: '#91a3ff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: width * 0.4,
+        width: width * 0.25,
+        height: width * 0.25,
+        elevation: 5,
+
+    },
     content: {
         alignItems: 'flex-start',
         paddingTop: 20,
@@ -287,7 +320,8 @@ const styles = StyleSheet.create({
     },
     serviceItem: {
         flexDirection: 'row',
-        width: width, paddingHorizontal: 30,
+        width: width,
+        paddingHorizontal: 40,
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingBottom: 10,
@@ -295,7 +329,7 @@ const styles = StyleSheet.create({
     },
     serviceTitle: {
         color: '#91a3ff',
-        fontSize: 18,
+        fontSize: 15,
         flexWrap: 'wrap'
 
     },
@@ -305,7 +339,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     serviceItemContainer: {
-        alignItems: 'center'
+        alignItems: 'center',
     },
     titleContainer: {
         padding: 10,

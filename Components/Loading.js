@@ -77,22 +77,15 @@ class Loading extends React.Component {
 
             if (user !== null) {
                 if (user.metadata.lastSignInTime === user.metadata.creationTime && key === null) {
-
                     console.log("This is the user.uid: " + user.uid);
                     console.log("This is the user.email: " + user.email);
                     console.log("This is the user Creation Time: " + user.metadata.creationTime);
-
-                    // //ASSUME THAT THIS IS AN INITIAL USER
-                    // agent.setters.setInitialUser(user.uid, user.email, user.metadata.creationTime);
-                    // this.props.setUser(user);
-
                     this.props.getUser(user.uid);
                     this.storeData().then(() => this.props.navigation.navigate('WalkThrough'));
                 } else {
                     console.log('in else');
                     console.log(user.uid);
                     this.props.getUser(user.uid);
-
                     this.props.setUser(user);
                     // this.props.navigation.navigate('OrderSummary')
                     // this.props.navigation.navigate('Home')

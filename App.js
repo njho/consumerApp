@@ -28,7 +28,7 @@ import OrderSummary from './Components/OrderSummary';
 import Vehicles from './Components/Vehicles';
 import EditVehicle from './Components/EditVehicle';
 import ActiveOrders from './Components/ActiveOrders';
-
+import VehiclePicker from './Components/VehiclePicker';
 import CreditCards from './Components/CreditCards';
 import EditCC from './Components/EditCC';
 import InitialDetails from './Components/InitialDetails';
@@ -92,6 +92,7 @@ const OrderStack = StackNavigator({
     Home: BasicOrder,
     secondOrder: SecondOrder,
     OrderSummary: OrderSummary,
+    VehiclePicker: VehiclePicker
 });
 
 const SettingsStack = StackNavigator({

@@ -57,19 +57,19 @@ class EditCC extends React.Component {
         ),
     };
 
-    saveVehicle(isNew) {
+    saveVehicle(isNew, redirect) {
         console.log(this.state);
         console.log(this.props.creditCardDocId);
         console.log(isNew);
 
-        if(isNew && this.state.valid) {
+        if (isNew && this.state.valid) {
             agent.actions.createStripeCustomer({
                 uid: this.props.user.uid,
                 number: this.state.number,
                 exp_year: this.state.exp_year,
                 cvc: this.state.cvc,
-            });
-        } else if(this.state.valid && !isNew) {
+            }, redirect);
+        } else if (this.state.valid && !isNew) {
             agent.actions.updateStripeCustomer({
                 uid: this.props.user.uid,
                 number: this.state.number,
@@ -77,8 +77,8 @@ class EditCC extends React.Component {
                 cvc: this.state.cvc,
                 docId: this.props.creditCardDocId
             });
+            this.props.navigation.goBack();
         }
-        this.props.navigation.goBack();
 
     }
 
@@ -94,9 +94,19 @@ class EditCC extends React.Component {
         })
     };
 
+    backButton = (redirect) => {
+        if (redirect) {
+            this.props.navigation.navigate('secondOrder')
+
+        } else {
+            this.props.navigation.goBack()
+        }
+    };
+
 
     render() {
         const isNew = this.props.navigation.getParam('isNew');
+        const redirect = this.props.navigation.getParam('redirect');
 
         return (
 
@@ -108,7 +118,10 @@ class EditCC extends React.Component {
                         'Are you sure you would like to delete this Credit Card?',
                         [
                             {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                            {text: 'OK', onPress: () => this.props.deleteCreditCard(this.props.user.uid, this.props.creditCardDocId)},
+                            {
+                                text: 'OK',
+                                onPress: () => this.props.deleteCreditCard(this.props.user.uid, this.props.creditCardDocId)
+                            },
                         ],
                         {cancelable: false}
                     )}>
@@ -122,11 +135,11 @@ class EditCC extends React.Component {
                 </View>
 
                 <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
-                    <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                    <TouchableOpacity onPress={() => this.backButton(redirect)}>
                         <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.completionButton} onPress={() => this.saveVehicle(isNew)}>
+                <TouchableOpacity style={styles.completionButton} onPress={() => this.saveVehicle(isNew, redirect)}>
                     <Icon name="ios-checkmark" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
                     <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Save </Text>
                 </TouchableOpacity>

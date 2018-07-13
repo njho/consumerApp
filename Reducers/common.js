@@ -3,7 +3,11 @@ const defaultState = {
     loginState: 0,
     orderHour: 0,
     orderFill: 0,
-    servicesSelected: [false, false, false],
+    servicesSelected: {
+        windshieldTopUp: false,
+        chip: false,
+        tire: false
+    },
     feedback: null,
     zones: [],
     regular: 0,
@@ -13,7 +17,10 @@ const defaultState = {
     tire: 0,
     lat: 0,
     lng: 0,
-    initialNavigation: null
+    initialNavigation: null,
+    orderVehicle: {},
+    recurringOrder: false,
+    deliverRates: {}
 };
 
 export default (state = defaultState, action) => {
@@ -72,6 +79,7 @@ export default (state = defaultState, action) => {
                 windshield: action.value.windshield,
                 topUp: action.value.topUp,
                 tire: action.value.tire,
+                deliverRates: action.value.deliverRates
 
             };
         case 'SET_COORDINATES':
@@ -90,6 +98,20 @@ export default (state = defaultState, action) => {
 
             };
 
+        case 'SET_ORDER_VEHICLE':
+            console.log(action.value);
+            return {
+                ...state,
+                orderVehicle: action.value
+
+            };
+        case 'TOGGLE_RECURRING_ORDER':
+            console.log(action.value);
+            return {
+                ...state,
+                recurringOrder: action.value
+
+            };
     }
 
     return state;

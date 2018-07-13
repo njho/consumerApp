@@ -8,11 +8,12 @@ import {
     Alert,
     TouchableOpacity,
     Dimensions,
+    Switch,
     Animated,
     Easing
 } from 'react-native';
 import {connect} from 'react-redux';
-import MapView, {Polygon} from 'react-native-maps';
+import MapView, {Polygon, Marker} from 'react-native-maps';
 import Interactable from 'react-native-interactable';
 import Icon from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
@@ -34,7 +35,9 @@ const mapStateToProps = state => ({
     zones: state.common.zones,
 
     regular: state.common.regular,
-    premium: state.common.premium
+    premium: state.common.premium,
+    deliverRates: state.common.deliverRates,
+    recurringOrder: state.common.recurringOrder
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -59,6 +62,9 @@ const mapDispatchToProps = dispatch => ({
     getUserCreditCards: (uid) => {
         dispatch(agent.getters.getUserCreditCards(uid))
     },
+    getPaymentInfo: (uid) => {
+        dispatch(agent.getters.getPaymentInfo(uid))
+    },
     getZones: (city) => {
         dispatch(agent.getters.getZones(city))
     },
@@ -70,6 +76,9 @@ const mapDispatchToProps = dispatch => ({
     },
     setCoordinates: (lat, lng) => {
         dispatch({type: 'SET_COORDINATES', lat: lat, lng: lng});
+    },
+    toggleRecurringOrder: (value) => {
+        dispatch({type: 'TOGGLE_RECURRING_ORDER', value: value});
     }
 });
 
@@ -97,9 +106,11 @@ class BasicOrder extends React.Component {
         this.props.getUserDetails(this.props.user.uid);
         this.props.getuserVehicles(this.props.user.uid);
         this.props.getUserCreditCards(this.props.user.uid);
+        this.props.getPaymentInfo(this.props.user.uid);
+
         this.props.getUserJobs(this.props.user.uid);
 
-        this.props.resetAllOrderInfo();
+        // this.props.resetAllOrderInfo();
         this.props.getZones('calgary');
 
         // firestore.collection('zones').doc('calgary').collection('zones').doc('repsol').set({
@@ -146,6 +157,10 @@ class BasicOrder extends React.Component {
             }
         ).start();
         this.props.setCoordinates(event.latitude, event.longitude);
+        this.setState({
+            ...this.state,
+            longitudeDelta: event.longitudeDelta
+        });
 
 
         let cat = 0;
@@ -160,10 +175,8 @@ class BasicOrder extends React.Component {
 
             } else {
                 if (cat === 1) {
-
                 } else {
                     cat = 0;
-
                 }
 
             }
@@ -172,7 +185,7 @@ class BasicOrder extends React.Component {
         if (cat === 1) {
             this.interactable.snapTo({index: 0});
         } else {
-            this.props.resetAllOrderInfo();
+            // this.props.resetAllOrderInfo();
 
             this.interactable.snapTo({index: 2});
             this.props.octaneSelected(null);
@@ -202,14 +215,28 @@ class BasicOrder extends React.Component {
     };
 
     renderZones = () => {
+        if (this.state.longitudeDelta > 0.005810000002369975) {
+            return this.props.zones.map((element, index) => {
+                return <Polygon
+                    key={index}
+                    coordinates={element.poly}
+                    fillColor="rgba(209,133,255, 0.3)"
+                    strokeColor="#d185ff"
+                    strokeWidth={1}
+                />
+            })
+        } else {
+            return null
+        }
+
+    };
+    renderMarkers = () => {
         return this.props.zones.map((element, index) => {
-            return <Polygon
-                key={index}
-                coordinates={element.poly}
-                fillColor="rgba(209,133,255, 0.3)"
-                strokeColor="#d185ff"
-                strokeWidth={1}
-            />
+            return <Marker coordinate={element.center} key={index}>
+                <View style={{backgroundColor: '#dda6ff', paddingHorizontal: 10, borderRadius: 5, paddingVertical: 5}}>
+                    <Text style={{color: 'white'}}>{element.id}</Text>
+                </View>
+            </Marker>
         })
     };
 
@@ -255,10 +282,8 @@ class BasicOrder extends React.Component {
                 <MapView
                     mapType={"satellite"}
                     showsUserLocation={true}
-                    // showsMyLocationButton={true}
                     showsScale={true}
                     provider={'google'}
-                    // showsBuildings={true}
                     loadingEnabled={true}
                     initialRegion={{
                         latitude: 51.050297,
@@ -280,9 +305,11 @@ class BasicOrder extends React.Component {
                     onRegionChangeComplete={(event) => this.regionChangeComplete(event)}
                     style={{flex: 1}}
                     // setMapToolbarEnabled={true}
-
                 >
                     {this.props.zones.length > 0 ? this.renderZones() : null}
+
+                    {this.props.zones.length > 0 ? this.renderMarkers() : null}
+
 
                 </MapView>
 
@@ -357,6 +384,21 @@ class BasicOrder extends React.Component {
                                     <Text style={{color: 'rgba(0,0,0,0.2)', fontWeight: '900'}}>____</Text>
                                 </View>
                                 <View style={styles.send}>
+                                    <View style={styles.recurring}>
+                                        <View style={{paddingRight: 15, }}>
+                                            <Text style={{color: '#dda6ff', fontWeight: 'bold', paddingLeft: 15}}>
+                                                Make this a weekly service
+                                            </Text>
+                                            <Text style={{paddingLeft: 15, color: '#dda6ff', fontSize: 11}}>
+                                                10% discount after 3 fills.
+                                            </Text>
+                                        </View>
+                                        <Switch
+                                            // onTintColor={'#cbffa2'}
+                                            // tintColor={'white'}
+                                            onValueChange={() => this.props.toggleRecurringOrder(!this.props.recurringOrder)}
+                                            value={this.props.recurringOrder}/>
+                                    </View>
                                     <TouchableOpacity style={styles.sendButton}
                                                       onPress={() => {
                                                           this.submit();
@@ -402,6 +444,8 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 1 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>1 HR</Text>
+                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.one})</Text>
+
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() => this.hourSelection(2)}
@@ -410,6 +454,8 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 2 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>2 HRS</Text>
+                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.two})</Text>
+
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() => this.hourSelection(4)}
@@ -418,6 +464,9 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 4 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>4 HRS</Text>
+                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.four})</Text>
+
+
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -587,10 +636,25 @@ const styles = StyleSheet.create({
     },
     send: {
         position: 'absolute',
-        right: 15,
-        bottom: 15,
+        left: 0,
+        bottom: 10,
+        flexDirection: 'row',
+        width: width,
+        justifyContent: 'space-between',
+        paddingRight: 15,
+        alignItems: 'center'
 
     },
+    recurring: {
+        paddingVertical: 10,
+        backgroundColor: 'white',
+        borderTopRightRadius: 5,
+        borderBottomRightRadius: 5,
+        paddingHorizontal: 5,
+        elevation: 2,
+        flexDirection: 'row'
+    },
+
     sendButton: {
         borderRadius: 100,
         width: 50,

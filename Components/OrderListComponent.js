@@ -44,15 +44,15 @@ class OrderListComponent extends React.Component {
     componentWillMount() {
         console.log(this.props.item.jobId);
 
-        console.log(this.state.jobInfo);
         console.log('OrderListComponent');
+        console.log(this.state.jobInfo);
+
         console.log(this.props.item);
         agent.getters.getJobInformation(this.props.item.jobId).onSnapshot(doc => {
             this.setState({jobInfo: doc.data()})
 
-        },(err) => {
+        }, (err) => {
             console.log(err);
-            console.log('fck')
         })
     }
 
@@ -84,7 +84,7 @@ class OrderListComponent extends React.Component {
             }}>
                 {this.state.jobInfo === null ? null :
                     <View>
-                        {this.state.jobInfo.cancelled === true || this.state.jobInfo.chargeCaptured === true ? null :
+                        {this.state.jobInfo.cancelled || this.state.jobInfo.chargeCaptured ? null :
 
                             <MapView
                                 mapType={"satellite"}
@@ -128,15 +128,17 @@ class OrderListComponent extends React.Component {
                             }]}>
                                 <Text style={{
                                     textDecorationLine: 'underline',
-                                }}>Services:</Text> Fill, Windshield Washer Top-Up, Windshield Chip Repair,
-                                Tire Check
+                                }}>Services: </Text>
+                                Fill, {this.state.jobInfo.servicesSelected.chip ? ' Windshield Chip Repair ' : null}
+                                {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Washer Fluid Top-Up ' : null}
+                                {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Tire Check & Fill ' : null}
                                 {"\n"}
                                 <Text style={{
                                     textDecorationLine: 'underline',
-                                }}>Vehicle: </Text> Acura NSX, Black, BNN 2260 {"\n"}
+                                }}>Vehicle: </Text> {this.state.jobInfo.vehicle.make} {this.state.jobInfo.vehicle.model}, {this.state.jobInfo.vehicle.color}, {this.state.jobInfo.vehicle.license} {"\n"}
                                 <Text style={{
                                     textDecorationLine: 'underline',
-                                }}>Fill:</Text> Premium {"\n"}
+                                }}>Fill:</Text> {this.state.jobInfo.octane === 87 ? 'Regular' : 'Premium'} {"\n"}
 
                                 <Text style={{
                                     textDecorationLine: 'underline',
@@ -167,7 +169,7 @@ class OrderListComponent extends React.Component {
                                     Cancelled
                                 </Text>
                             }
-                            </View>
+                        </View>
                     </View>}
 
 

@@ -1,5 +1,15 @@
 import React from 'react';
-import {StyleSheet, KeyboardAvoidingView, Image, Text, View, Button, TouchableOpacity, Dimensions, FlatList} from 'react-native';
+import {
+    StyleSheet,
+    KeyboardAvoidingView,
+    Image,
+    Text,
+    View,
+    Button,
+    TouchableOpacity,
+    Dimensions,
+    FlatList
+} from 'react-native';
 import update from 'immutability-helper';
 
 
@@ -14,7 +24,9 @@ const mapStateToProps = state => ({
     servicesSelected: state.common.servicesSelected,
     windshield: state.common.windshield,
     topUp: state.common.topUp,
-    tire: state.common.tire
+    tire: state.common.tire,
+
+    vehicles: state.auth.vehicles
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -29,9 +41,7 @@ const mapDispatchToProps = dispatch => ({
 class SecondOrder extends React.Component {
     constructor() {
         super();
-        this.state = {
-
-        }
+        this.state = {}
     };
 
 
@@ -49,17 +59,22 @@ class SecondOrder extends React.Component {
                 {
                     title: 'Windshield Washer Fluid Top Up',
                     description: 'Just as it sounds.',
-                    price: `${this.props.windshield}`
+                    price: `${this.props.topUp}`,
+                    id: 'windshieldTopUp'
                 },
                 {
                     title: 'Windshield Chip Repair',
                     description: 'Our technician will take care of that nasty crack in your windshield for you.',
-                    price: `${this.props.topUp}`
+                    price: `${this.props.windshield}`,
+                    id: 'chip'
+
                 },
                 {
                     title: 'Tire Check & Fill',
                     description: 'Tire looking flat? Our mobile compressor has you taken care of.',
-                    price: `${this.props.tire}`
+                    price: `${this.props.tire}`,
+                    id: 'tire'
+
                 }]
         })
     }
@@ -94,9 +109,20 @@ class SecondOrder extends React.Component {
         }
     }
 
-    serviceSelection = (index) => {
-        const newCollection = update(this.props.servicesSelected, {[index]: {$set: !this.props.servicesSelected[index]}});
+    serviceSelection = (id) => {
+        const newCollection = update(this.props.servicesSelected, {[id]: {$set: !this.props.servicesSelected[id]}});
         this.props.updateServicesSelected(newCollection);
+    };
+
+    optionNavigator = () => {
+        if (this.props.vehicles.length === 1) {
+            this.props.navigation.navigate('OrderSummary');
+        } else if (this.props.vehicles.length === 0) {
+            this.props.navigation.navigate('EditVehicle', {isNew: true, redirect: true});
+        } else if (this.props.vehicles.length > 1) {
+            this.props.navigation.navigate('VehiclePicker', {redirect: true});
+        };
+
     };
 
     render() {
@@ -116,15 +142,15 @@ class SecondOrder extends React.Component {
                         <Text style={styles.headerTitle}>Additional Services</Text>
                     </View>
                     <FlatList
-                        style={{flex: 1, width: width, }}
+                        style={{flex: 1, width: width,}}
                         data={this.state.services}
                         keyExtractor={(item, i) => String(i)}
                         renderItem={({item, index}) =>
                             <TouchableOpacity
-                                onPress={() => this.serviceSelection(index)}
+                                onPress={() => this.serviceSelection(item.id)}
                                 key={index} style={styles.serviceContainer}>
 
-                                {this.props.servicesSelected[index] ? <View style={{
+                                {this.props.servicesSelected[item.id] ? <View style={{
                                         width: width * 0.17,
                                         marginRight: 10,
                                         justifyContent: 'center',
@@ -161,7 +187,7 @@ class SecondOrder extends React.Component {
                             </TouchableOpacity>
                         }
                     />
-                    <TouchableOpacity onPress={()=>this.props.navigation.navigate('OrderSummary')} style={{marginBottom: 20, marginTop: 10}}>
+                    <TouchableOpacity onPress={() => this.optionNavigator()} style={{marginBottom: 20, marginTop: 10}}>
                         <Text style={{color: '#91a3ff', fontSize: 18, fontWeight: 'bold'}}>CONTINUE</Text>
                     </TouchableOpacity>
 

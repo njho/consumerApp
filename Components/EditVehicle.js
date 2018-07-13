@@ -64,7 +64,7 @@ const mapDispatchToProps = dispatch => ({
     setLicensePlate: (value) => {
         dispatch({type: 'SET_LICENSE_PLATE', value: value});
     },
-    sendVehicleInformation: (uid, vehicleObject, isNew, docId) => dispatch(agent.actions.sendVehicleInformation(uid, vehicleObject, isNew, docId)),
+    sendVehicleInformation: (uid, vehicleObject, isNew, docId, redirect) => dispatch(agent.actions.sendVehicleInformation(uid, vehicleObject, isNew, docId, redirect)),
     deleteVehicle: (uid, docId) => dispatch(agent.actions.deleteVehicle(uid, docId))
 
 });
@@ -102,10 +102,8 @@ class EditVehicle extends React.Component {
         ),
     };
 
-    sendVehicleInformation(isNew) {
-
+    sendVehicleInformation(isNew, redirect) {
         console.log(this.props);
-
         if (this.props.make && this.props.model && this.props.year && this.props.color && this.props.octane && this.props.license) {
             console.log(isNew);
             if (isNew) {
@@ -118,7 +116,7 @@ class EditVehicle extends React.Component {
                         octane: this.props.octane,
                         license: this.props.license
                     },
-                    isNew, null);
+                    isNew, null, redirect);
             } else {
                 console.log('this is the docID + ' + this.props.docId);
                 this.props.sendVehicleInformation(this.props.user.uid,
@@ -130,7 +128,7 @@ class EditVehicle extends React.Component {
                         octane: this.props.octane,
                         license: this.props.license
                     },
-                    isNew, this.props.docId);
+                    isNew, this.props.docId, redirect);
             }
         } else {
             Alert.alert(
@@ -145,13 +143,22 @@ class EditVehicle extends React.Component {
                 {cancelable: false}
             )
         }
-
-
     }
+
+    backButton = (redirect) => {
+        if (redirect) {
+            this.props.navigation.navigate('secondOrder')
+        } else {
+            this.props.navigation.goBack()
+        }
+    };
+
 
     render() {
 
         const isNew = this.props.navigation.getParam('isNew');
+        const redirect = this.props.navigation.getParam('redirect');
+        console.log(redirect);
 
         return (
 
@@ -264,11 +271,11 @@ class EditVehicle extends React.Component {
                 </View>
 
                 <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
-                    <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                    <TouchableOpacity onPress={() => this.backButton(redirect)}>
                         <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.completionButton} onPress={() => this.sendVehicleInformation(isNew)}>
+                <TouchableOpacity style={styles.completionButton} onPress={() => this.sendVehicleInformation(isNew, redirect)}>
                     <Icon name="ios-checkmark" size={30} color={'#91a3ff'} style={{paddingRight: 15}}/>
                     <Text style={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}>Save </Text>
                 </TouchableOpacity>
