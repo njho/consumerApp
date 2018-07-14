@@ -16,8 +16,10 @@ const mapStateToProps = state => ({
     user: state.auth.user,
     creditCards: state.auth.creditCards,
     orderVehicle: state.common.orderVehicle,
+    orderPromotion: state.common.orderPromotion,
     paymentInfo: state.auth.userPayment,
     vehicles: state.auth.vehicles,
+    availablePromos: state.auth.availablePromos,
 
     servicesSelected: state.common.servicesSelected,
     windshield: state.common.windshield,
@@ -30,7 +32,8 @@ const mapStateToProps = state => ({
 
     orderFill: state.common.orderFill,
     lat: state.common.lat,
-    lng: state.common.lng
+    lng: state.common.lng,
+
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -63,7 +66,7 @@ class OrderSummary extends React.Component {
 
 
     calculateTotal = () => {
-        let total = this.props.orderFill + this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.chip * this.props.windshield + this.props.servicesSelected.tire * this.props.tire;
+        let total = this.props.orderFill + this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.chip * this.props.windshield + this.props.servicesSelected.tire * this.props.tire - (this.props.orderPromotion !== null ? this.props.orderPromotion.value/100 : 0);
         console.log('This is the total ' + total);
         return total
     };
@@ -94,13 +97,15 @@ class OrderSummary extends React.Component {
         console.log(this.props.creditCards);
         if (this.props.creditCards.length === 1) {
             console.log('There is a default Credit Card Already');
-            if(this.props.vehicles.length === 1) {
+            if (this.props.vehicles.length === 1) {
                 console.log(this.props.vehicles)
                 this.props.setOrderVehicle(this.props.vehicles[0]);
             }
         } else if (this.props.creditCards.length === 0) {
             this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
         }
+        console.log('Order Promotion');
+        console.log(this.props.orderPromotion);
     }
 
     render() {
@@ -119,7 +124,10 @@ class OrderSummary extends React.Component {
                         <View style={styles.headerContent}>
                             <View style={styles.headerBox}>
                                 <Icon name="ios-car-outline" color={'white'} size={40}/>
-                                <Text style={{color: 'white', fontSize: 12,}}>{this.props.orderVehicle !== {} || typeof (this.props.orderVehicle ) !== 'undefined' ? this.props.orderVehicle.license : null}</Text>
+                                <Text style={{
+                                    color: 'white',
+                                    fontSize: 12,
+                                }}>{this.props.orderVehicle !== {} || typeof (this.props.orderVehicle ) !== 'undefined' ? this.props.orderVehicle.license : null}</Text>
                             </View>
                             <View style={styles.headerBox}>
                                 <Icon name="ios-card-outline" color={'white'} size={40}/>
@@ -130,7 +138,7 @@ class OrderSummary extends React.Component {
 
                             </View>
                         </View>
-                        <View style={styles.serviceItem}>
+                        <View style={[styles.serviceItem,]}>
                             <View>
                                 <Text style={styles.serviceTitle}>FILL</Text>
                                 <Text style={{color: '#91a3ff', fontSize: 12,}}>(PRE-AUTHORIZATION)</Text>
@@ -157,7 +165,7 @@ class OrderSummary extends React.Component {
                                 <Text
                                     style={{color: '#91a3ff', fontSize: 14, marginLeft: 15}}>${this.props.topUp}</Text>
                             </View>
-                            <View style={{width: width * 0.8, height: 1, backgroundColor: '#cbcdff', marginBottom: 35}}>
+                            <View style={{width: width * 0.8, height: 1, backgroundColor: '#cbcdff',}}>
                                 <View style={{
                                     width: width * (this.props.topUp / this.calculateTotal()) * 0.8,
                                     height: 1,
@@ -185,7 +193,6 @@ class OrderSummary extends React.Component {
                                     width: width * 0.8,
                                     height: 1,
                                     backgroundColor: '#cbcdff',
-                                    marginBottom: 35
                                 }}>
                                     <View style={{
                                         width: width * (this.props.windshield / this.calculateTotal()) * 0.8,
@@ -216,7 +223,6 @@ class OrderSummary extends React.Component {
                                     width: width * 0.8,
                                     height: 1,
                                     backgroundColor: '#cbcdff',
-                                    marginBottom: 35
                                 }}>
                                     <View style={{
                                         width: width * (this.props.tire / this.calculateTotal()) * 0.8,
@@ -227,6 +233,42 @@ class OrderSummary extends React.Component {
                                 </View>
                             </View>
                             : null}
+
+                        {this.props.orderPromotion !== null ? <View style={styles.serviceItemContainer}>
+                                <View style={styles.serviceItem}>
+                                    <View>
+                                        <Text
+                                            style={[styles.serviceTitle, {
+                                                color: '#66c672',
+                                            }]}>Fuel Credit Applied</Text>
+                                    </View>
+                                    <View>
+                                        <Text style={{
+                                            color: '#66c672',
+                                            fontSize: 14,
+                                            marginLeft: 15
+                                        }}>-${(this.props.orderPromotion.value / 100).toFixed(2)}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            : null}
+
+                        {this.props.availablePromos > 0 && this.props.orderPromotion == null ? <TouchableOpacity
+                            onPress={() => this.props.navigation.navigate('PromotionPicker')
+                            }
+                            style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: width * 0.9,
+                                backgroundColor: '#91a3ff',
+                                elevation: 2,
+                                paddingVertical: 10,
+                                marginBottom: 20
+                            }}>
+
+                            <Text style={{color: 'white'}}>Apply Available Credits</Text>
+                        </TouchableOpacity> : null}
+
                         <View style={styles.serviceItem}>
 
                             <Text style={{color: '#91a3ff', fontSize: 12, textAlign: 'center'}}>Fueling excise tax to be
@@ -252,6 +294,7 @@ class OrderSummary extends React.Component {
                             </View>
                         </View>
                     </View>
+
 
                 </View>
                 <TouchableOpacity style={{marginBottom: 30}} onPress={() => this.confirmOrder()}>
@@ -340,6 +383,7 @@ const styles = StyleSheet.create({
     },
     serviceItemContainer: {
         alignItems: 'center',
+        paddingBottom: 30
     },
     titleContainer: {
         padding: 10,

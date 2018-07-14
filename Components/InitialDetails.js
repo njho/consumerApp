@@ -7,7 +7,7 @@ import {
     Text,
     TextInput,
     View,
-    Button,
+    ScrollView,
     TouchableOpacity,
     Alert,
     Dimensions
@@ -27,6 +27,7 @@ const mapStateToProps = state => ({
     firstName: state.auth.firstName,
     lastName: state.auth.lastName,
     phoneNumber: state.auth.phoneNumber,
+    referral: state.auth.referral,
 
     userInfoUpdated: state.auth.userInfoUpdated
 });
@@ -44,7 +45,10 @@ const mapDispatchToProps = dispatch => ({
     setLastName: (value) => {
         dispatch({type: 'SET_LAST_NAME', value: value});
     },
-    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber) => dispatch(agent.setters.setInitialUserDetails(uid, firstName, lastName, email, phoneNumber))
+    setReferral: (value) => {
+        dispatch({type: 'SET_REFERRAL', value: value});
+    },
+    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber, referral) => dispatch(agent.setters.setInitialUserDetails(uid, firstName, lastName, email, phoneNumber, referral))
 });
 
 
@@ -79,6 +83,9 @@ class InitialDetails extends React.Component {
             case 'phoneNumber':
                 this.props.setPhoneNumber(text);
                 break;
+            case 'referral':
+                this.props.setReferral(text);
+                break;
         }
     };
 
@@ -94,7 +101,7 @@ class InitialDetails extends React.Component {
         console.log(this.props.phoneNumber);
         console.log(this.props.firstName)
         if (this.props.user.uid && this.props.firstName && this.props.lastName && this.props.email && this.props.phoneNumber) {
-            this.props.setInitialUserDetails(this.props.user.uid, this.props.firstName, this.props.lastName, this.props.email, this.props.phoneNumber);
+            this.props.setInitialUserDetails(this.props.user.uid, this.props.firstName, this.props.lastName, this.props.email, this.props.phoneNumber, this.props.referral);
         } else {
             Alert.alert('Please provide all fields!');
 
@@ -109,78 +116,93 @@ class InitialDetails extends React.Component {
 
                 <LinearGradient colors={['#484e4e', '#37abb8']}
                                 style={styles.container}>
+                    <ScrollView contentContainerStyle={{padding: 20, height: height}}>
 
-                    <View style={styles.logoContainer}>
+                        <View style={styles.logoContainer}>
 
-                        <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
-                        <Text style={styles.welcome}>
-                            Welcome to Sure Fuel!</Text>
-                        <Text style={styles.subheader}>
-                            Please provide us with some initial information to help us serve you
-                            better!
-                        </Text>
-                    </View>
-
-
-                    <View style={styles.listContainer}>
-
-                        <View style={styles.listItem}>
-                            <TextInput
-                                style={styles.textInput}
-                                underlineColorAndroid='rgba(0,0,0,0)'
-                                placeholderTextColor={'white'}
-                                placeholder={'First Name'}
-                                value={this.props.firstName}
-                                onChangeText={(text) => this.textHandler('firstName', text)}
-                            />
+                            <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
+                            <Text style={styles.welcome}>
+                                Welcome to Sure Fuel!</Text>
+                            <Text style={styles.subheader}>
+                                Please provide us with some initial information to help us serve you
+                                better!
+                            </Text>
                         </View>
 
-                        <View style={styles.listItem}>
-                            <TextInput
-                                style={styles.textInput}
-                                underlineColorAndroid='rgba(0,0,0,0)'
-                                placeholderTextColor={'white'}
-                                placeholder={'Last Name'}
-                                value={this.props.lastName}
-                                onChangeText={(text) => this.textHandler('lastName', text)}
-                            />
-                        </View>
-                        <View style={styles.listItem}>
-                            <TextInput
-                                style={styles.textInput}
-                                underlineColorAndroid='rgba(0,0,0,0)'
-                                placeholderTextColor={'white'}
-                                keyboardType={'email-address'}
-                                placeholder={'E-mail'}
-                                value={this.props.email}
-                                onChangeText={(text) => this.textHandler('email', text)}
-                            />
-                        </View>
-                        <View style={styles.listItem}>
-                            <TextInput
-                                style={styles.textInput}
-                                underlineColorAndroid='rgba(0,0,0,0)'
-                                placeholderTextColor={'white'}
-                                keyboardType={'numeric'}
-                                placeholder={'Phone Number'}
-                                value={this.props.phoneNumber}
-                                onChangeText={(text) => this.textHandler('phoneNumber', text)}
-                            />
-                        </View>
-                        <TouchableOpacity style={{alignSelf: 'stretch'}} onPress={() => this.initialLoadSubmit()}>
-                            <View style={{
-                                borderColor: 'white',
-                                borderWidth: 1,
-                                borderRadius: 30,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: 10,
-                                alignSelf: 'stretch',
-                            }}>
-                                <Text style={{color: 'white', fontSize: 18}}>SUBMIT</Text>
+
+                        <View style={styles.listContainer}>
+
+                            <View style={styles.listItem}>
+                                <TextInput
+                                    style={styles.textInput}
+                                    underlineColorAndroid='rgba(0,0,0,0)'
+                                    placeholderTextColor={'white'}
+                                    placeholder={'First Name'}
+                                    value={this.props.firstName}
+                                    onChangeText={(text) => this.textHandler('firstName', text)}
+                                />
                             </View>
-                        </TouchableOpacity>
-                    </View>
+
+                            <View style={styles.listItem}>
+                                <TextInput
+                                    style={styles.textInput}
+                                    underlineColorAndroid='rgba(0,0,0,0)'
+                                    placeholderTextColor={'white'}
+                                    placeholder={'Last Name'}
+                                    value={this.props.lastName}
+                                    onChangeText={(text) => this.textHandler('lastName', text)}
+                                />
+                            </View>
+                            <View style={styles.listItem}>
+                                <TextInput
+                                    style={styles.textInput}
+                                    underlineColorAndroid='rgba(0,0,0,0)'
+                                    placeholderTextColor={'white'}
+                                    keyboardType={'email-address'}
+                                    placeholder={'E-mail'}
+                                    value={this.props.email}
+                                    onChangeText={(text) => this.textHandler('email', text)}
+                                />
+                            </View>
+                            <View style={styles.listItem}>
+                                <TextInput
+                                    style={styles.textInput}
+                                    underlineColorAndroid='rgba(0,0,0,0)'
+                                    placeholderTextColor={'white'}
+                                    keyboardType={'numeric'}
+                                    placeholder={'Phone Number'}
+                                    value={this.props.phoneNumber}
+                                    onChangeText={(text) => this.textHandler('phoneNumber', text)}
+                                />
+                            </View>
+                            <View style={styles.listItem}>
+                                <TextInput
+                                    style={styles.textInput}
+                                    underlineColorAndroid='rgba(0,0,0,0)'
+                                    placeholderTextColor={'white'}
+                                    keyboardType={'numeric'}
+                                    placeholder={'Referral Code'}
+                                    value={this.props.referral}
+                                    onChangeText={(text) => this.textHandler('referral', text)}
+                                />
+                            </View>
+                            <TouchableOpacity style={{alignSelf: 'stretch'}}
+                                              onPress={() => this.initialLoadSubmit()}>
+                                <View style={{
+                                    borderColor: 'white',
+                                    borderWidth: 1,
+                                    borderRadius: 30,
+                                    marginTop: 10,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: 10,
+                                    alignSelf: 'stretch',
+                                }}>
+                                    <Text style={{color: 'white', fontSize: 18}}>SUBMIT</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
                 </LinearGradient>
             </KeyboardAvoidingView>
 
@@ -197,11 +219,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     container: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
-        padding: 20
     },
 
     logo: {
@@ -243,7 +263,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'stretch',
-        marginBottom: 5
+        marginBottom: 10
     },
     textInput: {
         color: 'white',

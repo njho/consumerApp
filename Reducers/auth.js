@@ -5,13 +5,16 @@ const defaultState = {
     firstName: null,
     lastName: null,
     phoneNumber: null,
+    referral: null,
     userMeta : {},
     userPayment: {},
     userJobs: [],
 
     userInfoUpdated: false,
     vehicles: [],
-    creditCards: []
+    creditCards: [],
+    promotions: [],
+    availablePromos: 0
 };
 
 export default (state = defaultState, action) => {
@@ -46,6 +49,11 @@ export default (state = defaultState, action) => {
                 ...state,
                 user: action.value
             };
+        case 'SET_REFERRAL':
+            return {
+                ...state,
+                referral: action.value
+            };
         case 'USER_INFO_UPDATED':
             return {
                 ...state,
@@ -60,6 +68,12 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 creditCards: action.value
+            };
+        case 'SET_USER_PROMOTIONS':
+            return {
+                ...state,
+                promotions: action.value,
+                availablePromos: action.availablePromos
             };
         case 'SET_USER_META':
             return {

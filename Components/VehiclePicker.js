@@ -69,6 +69,7 @@ class VehiclePicker extends React.Component {
         console.log('This is the ID of the orderVehicle')
         this.props.setOrderVehicle(id);
         this.props.navigation.navigate('OrderSummary')
+
     };
 
 

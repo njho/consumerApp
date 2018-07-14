@@ -23,14 +23,15 @@ const width = Dimensions.get('window').width;
 
 
 const mapStateToProps = state => ({
-    promotions: state.auth.promotions
+    promotions: state.auth.promotions,
 });
 
 const mapDispatchToProps = dispatch => ({
+
 });
 
 
-class Promotions extends React.Component {
+class PromotionPicker extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -40,12 +41,6 @@ class Promotions extends React.Component {
 
     static navigationOptions = {
         header: null,
-        drawerLabel: 'Your Rewards',
-        drawerIcon: ({tintColor}) => (
-            <Icon name="ios-cash" size={25} color={tintColor}/>
-
-        ),
-
     };
 
 
@@ -57,8 +52,7 @@ class Promotions extends React.Component {
                                   contentContainerStyle={{paddingBottom: 5}} enabled>
                 <View style={styles.container}>
                     <View style={styles.header}>
-                        <Text style={styles.headerTitle}>Your Rewards</Text>
-                        <Text style={{color: 'white'}}>A list of available credits.</Text>
+                        <Text style={styles.headerTitle}>Please pick a credit to apply</Text>
                     </View>
                     <ScrollView>
                         <FlatList
@@ -66,13 +60,13 @@ class Promotions extends React.Component {
                             data={this.props.promotions}
                             keyExtractor={(item, i) => String(i)}
                             renderItem={({item, index}) =>
-                                <PromotionsListComponent index={index} item={item}/>
+                                <PromotionsListComponent picker={true} index={index} item={item}/>
                             }
                         />
                     </ScrollView>
                     <View style={{position: 'absolute', left: 30, top: 15, elevation: 5}}>
-                        <TouchableOpacity onPress={() => this.props.navigation.toggleDrawer()}>
-                            <Icon name="ios-menu" size={35} color={'rgba(255,255,255,0.9)'}/>
+                        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                            <Icon name="ios-arrow-back" size={35} color={'rgba(255,255,255,0.9)'}/>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -83,7 +77,7 @@ class Promotions extends React.Component {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Promotions);
+export default connect(mapStateToProps, mapDispatchToProps)(PromotionPicker);
 
 
 const styles = StyleSheet.create({

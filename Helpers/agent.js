@@ -104,7 +104,7 @@ const getters = {
                     } else if (typeof doc.data().firstName === 'undefined' && typeof doc.data().lastName === 'undefined' && typeof doc.data().phone === 'undefined' && typeof doc.data().email === 'undefined' && typeof doc.data().walkthroughCompleted !== 'undefined') {
                         firstNavigation = 'InitialDetails';
                     } else {
-                        firstNavigation = 'Home'
+                        firstNavigation = 'Home'; //Home
                     }
                     dispatch({
                         type: 'SET_USER_META',
@@ -152,6 +152,9 @@ const getters = {
     getJobInformation: (jobId) => {
         return firestore.collection('jobs').doc('calgary').collection('jobs').doc(jobId)
     },
+    getCodeInformation: (id) => {
+        return firestore.collection('codes').doc(id)
+    },
     getUserCreditCards: (uid) => {
         return dispatch => {
             firestore.collection('users').doc(uid).collection('creditCards').onSnapshot(querySnapshot => {
@@ -162,11 +165,53 @@ const getters = {
                         ...doc.data(),
                         id: doc.id,
                     });
+
+
                 });
                 console.log(array);
                 dispatch({
                     type: 'SET_USER_CREDIT_CARDS',
                     value: array
+                });
+
+
+            })
+        }
+    },
+    getUserPromotions: (uid) => {
+        return dispatch => {
+            firestore.collection('users').doc(uid).collection('codes').onSnapshot(querySnapshot => {
+                let array = [];
+
+                let availablePromos = 0;
+                var itemsProcessed = 0;
+                console.log(querySnapshot.size)
+
+                querySnapshot.forEach(function (doc) {
+                    firestore.collection('codes').doc(doc.id).get().then(codeData => {
+                        console.log('user promo');
+                        itemsProcessed++;
+
+                        if (!codeData.exists) {
+                            return null
+                        } else {
+                            array.push({
+                                ...codeData.data(),
+                                id: codeData.id,
+                            });
+                            if (codeData.data().status === 'activated' && ((codeData.data().issuer === uid && codeData.data().issuerRedeemed === false) || (codeData.data().receiver === uid && codeData.data().receiverRedeemed === false))) {
+                                availablePromos++;
+                            }
+
+                            if (itemsProcessed === querySnapshot.size) {
+                                dispatch({
+                                    type: 'SET_USER_PROMOTIONS',
+                                    value: array,
+                                    availablePromos: availablePromos
+                                });
+                            }
+                        }
+                    });
                 });
 
 
@@ -215,14 +260,15 @@ const setters = {
                 console.log('Error getting document', err);
             });
     },
-    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber) => {
+    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber, referral) => {
         return dispatch => {
             firestore.collection('users').doc(uid).set({
                     firstName: firstName,
                     lastName: lastName,
                     email: email,
                     phoneNumber: phoneNumber,
-                    walkthroughCompleted: true
+                    walkthroughCompleted: true,
+                    referral: referral
                 }, {merge: true})
                 .then((docRef) => {
                     dispatch({

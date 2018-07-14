@@ -65,6 +65,9 @@ const mapDispatchToProps = dispatch => ({
     getPaymentInfo: (uid) => {
         dispatch(agent.getters.getPaymentInfo(uid))
     },
+    getUserPromotions: (uid) => {
+        dispatch(agent.getters.getUserPromotions(uid))
+    },
     getZones: (city) => {
         dispatch(agent.getters.getZones(city))
     },
@@ -102,12 +105,11 @@ class BasicOrder extends React.Component {
     };
 
     componentWillMount() {
-        console.log(this.props.user.uid);
         this.props.getUserDetails(this.props.user.uid);
         this.props.getuserVehicles(this.props.user.uid);
         this.props.getUserCreditCards(this.props.user.uid);
         this.props.getPaymentInfo(this.props.user.uid);
-
+        this.props.getUserPromotions(this.props.user.uid);
         this.props.getUserJobs(this.props.user.uid);
 
         // this.props.resetAllOrderInfo();
@@ -215,29 +217,35 @@ class BasicOrder extends React.Component {
     };
 
     renderZones = () => {
+        return this.props.zones.map((element, index) => {
+            return <Polygon
+                key={index}
+                coordinates={element.poly}
+                fillColor="rgba(209,133,255, 0.3)"
+                strokeColor="#d185ff"
+                strokeWidth={1}
+            />
+        })
+
+    };
+    renderMarkers = () => {
         if (this.state.longitudeDelta > 0.005810000002369975) {
+
             return this.props.zones.map((element, index) => {
-                return <Polygon
-                    key={index}
-                    coordinates={element.poly}
-                    fillColor="rgba(209,133,255, 0.3)"
-                    strokeColor="#d185ff"
-                    strokeWidth={1}
-                />
+                return <Marker coordinate={element.center} key={index}>
+                    <View style={{
+                        backgroundColor: '#dda6ff',
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        paddingVertical: 5
+                    }}>
+                        <Text style={{color: 'white'}}>{element.id}</Text>
+                    </View>
+                </Marker>
             })
         } else {
             return null
         }
-
-    };
-    renderMarkers = () => {
-        return this.props.zones.map((element, index) => {
-            return <Marker coordinate={element.center} key={index}>
-                <View style={{backgroundColor: '#dda6ff', paddingHorizontal: 10, borderRadius: 5, paddingVertical: 5}}>
-                    <Text style={{color: 'white'}}>{element.id}</Text>
-                </View>
-            </Marker>
-        })
     };
 
 
@@ -385,7 +393,7 @@ class BasicOrder extends React.Component {
                                 </View>
                                 <View style={styles.send}>
                                     <View style={styles.recurring}>
-                                        <View style={{paddingRight: 15, }}>
+                                        <View style={{paddingRight: 15,}}>
                                             <Text style={{color: '#dda6ff', fontWeight: 'bold', paddingLeft: 15}}>
                                                 Make this a weekly service
                                             </Text>
@@ -444,7 +452,8 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 1 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>1 HR</Text>
-                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.one})</Text>
+                                            <Text
+                                                style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.one})</Text>
 
                                         </TouchableOpacity>
                                         <TouchableOpacity
@@ -454,7 +463,8 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 2 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>2 HRS</Text>
-                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.two})</Text>
+                                            <Text
+                                                style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.two})</Text>
 
                                         </TouchableOpacity>
                                         <TouchableOpacity
@@ -464,7 +474,8 @@ class BasicOrder extends React.Component {
                                                 elevation: this.props.orderHour === 4 ? 5 : 1
                                             }]]}>
                                             <Text style={styles.hourText}>4 HRS</Text>
-                                            <Text style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.four})</Text>
+                                            <Text
+                                                style={styles.preAuthText}>(${this.props.deliverRates === {} ? null : this.props.deliverRates.four})</Text>
 
 
                                         </TouchableOpacity>

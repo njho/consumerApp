@@ -36,12 +36,13 @@ const list = [
         route: 'CreditCards'
 
     },
-    {
+];
+
+/*   {
         title: 'View Your Promotions',
         subtitle: 'See all of your active promotions.',
         route: 'Promotions'
-    },
-];
+    },*/
 
 
 export default class Settings extends React.Component {
@@ -84,7 +85,7 @@ export default class Settings extends React.Component {
                                     containerStyle={{paddingTop: 20, paddingBottom: 20,}}
                                     titleStyle={{color: '#91a3ff', fontSize: 20, fontWeight: 'bold'}}
                                     subtitleContainerStyle={{paddingRight: 20}}
-                                    onPress={()=>this.props.navigation.navigate(item.route)}
+                                    onPress={() => this.props.navigation.navigate(item.route)}
                                 />
                             ))
                         }

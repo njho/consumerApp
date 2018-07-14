@@ -32,6 +32,8 @@ import VehiclePicker from './Components/VehiclePicker';
 import CreditCards from './Components/CreditCards';
 import EditCC from './Components/EditCC';
 import InitialDetails from './Components/InitialDetails';
+import PromotionPicker from './Components/PromotionPicker';
+
 
 
 import Promotions from './Components/Promotions';
@@ -92,6 +94,7 @@ const OrderStack = StackNavigator({
     Home: BasicOrder,
     secondOrder: SecondOrder,
     OrderSummary: OrderSummary,
+    PromotionPicker: PromotionPicker,
     VehiclePicker: VehiclePicker
 });
 
@@ -99,7 +102,6 @@ const SettingsStack = StackNavigator({
     Settings: Settings,
     Vehicles: Vehicles,
     CreditCards: CreditCards,
-    Promotions: Promotions,
     EditVehicle: EditVehicle,
     EditCC: EditCC
 
@@ -117,6 +119,7 @@ const drawerNav = createDrawerNavigator({
     Orders: ActiveOrders,
     Gift: Gift,
     // WalkThrough: WalkThrough,
+    Promotions: Promotions,
     Settings: {
         screen: SettingsStack,
         navigationOptions: {

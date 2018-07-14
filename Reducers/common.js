@@ -20,7 +20,8 @@ const defaultState = {
     initialNavigation: null,
     orderVehicle: {},
     recurringOrder: false,
-    deliverRates: {}
+    deliverRates: {},
+    orderPromotion: null
 };
 
 export default (state = defaultState, action) => {
@@ -103,6 +104,14 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 orderVehicle: action.value
+
+            };
+        case 'SET_ORDER_PROMOTION':
+            console.log('SET_ORDER_PROMOTION');
+            console.log(action.value);
+            return {
+                ...state,
+                orderPromotion: action.value
 
             };
         case 'TOGGLE_RECURRING_ORDER':
