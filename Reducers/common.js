@@ -21,6 +21,7 @@ const defaultState = {
     orderVehicle: {},
     recurringOrder: false,
     deliverRates: {},
+    orderReferral: '0rgEuP8WZv1UDQs8m40b',
     orderPromotion: null
 };
 
@@ -112,6 +113,14 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 orderPromotion: action.value
+
+            };
+        case 'SET_ORDER_REFERRAL':
+            console.log('SET_ORDER_REFERRAL');
+            console.log(action.value);
+            return {
+                ...state,
+                orderReferral: action.value
 
             };
         case 'TOGGLE_RECURRING_ORDER':

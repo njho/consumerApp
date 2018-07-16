@@ -23,7 +23,9 @@ const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+    user: state.auth.user
+});
 
 const mapDispatchToProps = dispatch => ({
     setOrderPromotion: (value) => {
@@ -44,11 +46,16 @@ class PromotionsListComponent extends React.Component {
         console.log(promotion);
         this.props.setOrderPromotion(promotion);
         NavigationService.navigate('OrderSummary');
-
-
     };
 
     conditionalRender = () => {
+
+        let identifier;
+
+        if(this.props.issuer)
+
+
+
         if (this.props.item.status === 'activated' && this.props.item.issuerRedeemed === false) {
             return <View
                 key={this.props.index}

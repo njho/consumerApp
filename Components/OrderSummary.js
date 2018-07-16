@@ -1,5 +1,15 @@
 import React from 'react';
-import {StyleSheet, Platform, ScrollView, Text, View, Button, TouchableOpacity, Dimensions,} from 'react-native';
+import {
+    StyleSheet,
+    TextInput,
+    ScrollView,
+    Text,
+    View,
+    Button,
+    ActivityIndicator,
+    TouchableOpacity,
+    Dimensions,
+} from 'react-native';
 
 import moment from 'moment';
 
@@ -17,9 +27,13 @@ const mapStateToProps = state => ({
     creditCards: state.auth.creditCards,
     orderVehicle: state.common.orderVehicle,
     orderPromotion: state.common.orderPromotion,
+    orderReferral: state.common.orderReferral,
+
     paymentInfo: state.auth.userPayment,
     vehicles: state.auth.vehicles,
-    availablePromos: state.auth.availablePromos,
+    availableSentPromos: state.auth.availableSentPromos,
+    receivedPromos: state.auth.receivedPromos,
+
 
     servicesSelected: state.common.servicesSelected,
     windshield: state.common.windshield,
@@ -49,11 +63,20 @@ const mapDispatchToProps = dispatch => ({
     setOrderVehicle: (value) => {
         dispatch({type: 'SET_ORDER_VEHICLE', value: value});
     },
+    setReferral: (value) => {
+        dispatch({type: 'SET_ORDER_REFERRAL', value: value});
+    },
+    setOrderPromotion: (value) => {
+        dispatch({type: 'SET_ORDER_PROMOTION', value: value});
+    },
 });
 
 class OrderSummary extends React.Component {
     constructor() {
         super();
+        this.state = {
+            loading: false,
+        }
     };
 
     static navigationOptions = {
@@ -66,7 +89,7 @@ class OrderSummary extends React.Component {
 
 
     calculateTotal = () => {
-        let total = this.props.orderFill + this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.chip * this.props.windshield + this.props.servicesSelected.tire * this.props.tire - (this.props.orderPromotion !== null ? this.props.orderPromotion.value/100 : 0);
+        let total = this.props.orderFill + this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.chip * this.props.windshield + this.props.servicesSelected.tire * this.props.tire - (this.props.orderPromotion !== null ? this.props.orderPromotion.value / 100 : 0);
         console.log('This is the total ' + total);
         return total
     };
@@ -92,21 +115,54 @@ class OrderSummary extends React.Component {
         this.props.createOrder(this.props.orderFill, this.props.octane, octanePrice, approximateLoad, currentTime.toString(), end.toString(), this.props.orderHour, this.props.servicesSelected, this.props.windshield, this.props.tire, this.props.topUp, this.props.lat, this.props.lng, this.props.user.uid, this.calculateTotal(), this.props.paymentInfo, this.props.orderVehicle);
     };
 
-    componentWillMount() {
-        console.log(this.props.orderVehicle);
-        console.log(this.props.creditCards);
-        if (this.props.creditCards.length === 1) {
-            console.log('There is a default Credit Card Already');
-            if (this.props.vehicles.length === 1) {
-                console.log(this.props.vehicles)
-                this.props.setOrderVehicle(this.props.vehicles[0]);
-            }
-        } else if (this.props.creditCards.length === 0) {
-            this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
+    // componentWillMount() {
+    //     console.log(this.props.orderVehicle);
+    //     console.log(this.props.creditCards);
+    //     if (this.props.creditCards.length === 1) {
+    //         console.log('There is a default Credit Card Already');
+    //         if (this.props.vehicles.length === 1) {
+    //             console.log(this.props.vehicles)
+    //             this.props.setOrderVehicle(this.props.vehicles[0]);
+    //         }
+    //     } else if (this.props.creditCards.length === 0) {
+    //         this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
+    //     }
+    //     console.log('Order Promotion');
+    //     console.log(this.props.orderPromotion);
+    // }
+
+    textHandler(value, text) {
+        switch (value) {
+            case 'referral':
+                this.props.setReferral(text);
+                break;
         }
-        console.log('Order Promotion');
-        console.log(this.props.orderPromotion);
+    };
+
+    async validatePromotionAsync(uid) {
+        let response = await agent.actions.validateGiftCode(uid, this.props.orderReferral);
+        console.log('This is the referralCode' + this.props.orderReferral);
+        let data = await response.json();
+        console.log(data);
+        return data;
     }
+
+    validatePromotion = (uid) => {o
+        console.log('Fuck');
+        this.setState({...this.state, loading: true});
+
+        this.validatePromotionAsync(uid).then((response) => {
+            console.log('this is the response + ' + response);
+            this.setState({...this.state, loading: false});
+
+            if (typeof response.value === 'undefined') {
+                this.props.setReferral('Code Not Valid')
+            } else {
+                this.props.setOrderPromotion(response);
+            }
+
+        })
+    };
 
     render() {
         return (
@@ -120,7 +176,7 @@ class OrderSummary extends React.Component {
                     <Text style={styles.headerTitle}>ORDER SUMMARY</Text>
                 </View>
                 <View style={styles.serviceContainer}>
-                    <ScrollView contentContainerStyle={{alignItems: 'center', paddingTop: 30, paddingBottom: 40,}}>
+                    <ScrollView contentContainerStyle={{alignItems: 'center', paddingTop: 30, paddingBottom: 20,}}>
                         <View style={styles.headerContent}>
                             <View style={styles.headerBox}>
                                 <Icon name="ios-car-outline" color={'white'} size={40}/>
@@ -234,7 +290,44 @@ class OrderSummary extends React.Component {
                             </View>
                             : null}
 
-                        {this.props.orderPromotion !== null ? <View style={styles.serviceItemContainer}>
+                        {this.props.receivedPromos < 1 ?
+                            <View style={[styles.serviceItemContainer, {marginBottom: 10, marginTop: 10}]}>
+                                <View style={[styles.serviceItem, {flexDirection: 'column'}]}>
+                                    <Text
+                                        style={[styles.serviceTitle, {
+                                            fontWeight: 'bold',
+                                            color: '#91a3ff',
+                                            fontSize: 18
+                                        }]}> SUREFUEL 7 FOR 7 CODE</Text>
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        flex: 1,
+                                        alignSelf: 'stretch',
+                                        alignItems: 'center'
+                                    }}>
+                                        <TextInput
+                                            style={styles.textInput}
+                                            underlineColorAndroid='rgba(0,0,0,0)'
+                                            placeholderTextColor={'#91a3ff'}
+                                            placeholder={'Code'}
+                                            value={this.props.orderReferral}
+                                            onChangeText={(text) => this.textHandler('referral', text)}
+                                        />
+                                        {this.state.loading ?
+                                            <ActivityIndicator
+                                                size="small" color="#7AFF9A"/>
+                                            : <TouchableOpacity style={{paddingLeft: 10}}
+                                                                onPress={() => this.validatePromotion(this.props.user.uid)}>
+                                                <Icon name="ios-checkmark-circle-outline" size={30} color={'#91a3ff'}/>
+                                            </TouchableOpacity>}
+
+                                    </View>
+                                </View>
+                            </View> : null}
+
+
+                        {this.props.orderPromotion !== null ?
+                            <View style={styles.serviceItemContainer}>
                                 <View style={styles.serviceItem}>
                                     <View>
                                         <Text
@@ -253,20 +346,22 @@ class OrderSummary extends React.Component {
                             </View>
                             : null}
 
+
                         {this.props.availablePromos > 0 && this.props.orderPromotion == null ? <TouchableOpacity
                             onPress={() => this.props.navigation.navigate('PromotionPicker')
                             }
                             style={{
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                width: width * 0.9,
-                                backgroundColor: '#91a3ff',
+                                flex: 1,
+                                alignSelf: 'stretch',
+                                marginHorizontal: 40, backgroundColor: '#91a3ff',
                                 elevation: 2,
                                 paddingVertical: 10,
-                                marginBottom: 20
+                                marginBottom: 20,
                             }}>
 
-                            <Text style={{color: 'white'}}>Apply Available Credits</Text>
+                            <Text style={{color: 'white'}}>You Have Credits Available!</Text>
                         </TouchableOpacity> : null}
 
                         <View style={styles.serviceItem}>
@@ -274,32 +369,33 @@ class OrderSummary extends React.Component {
                             <Text style={{color: '#91a3ff', fontSize: 12, textAlign: 'center'}}>Fueling excise tax to be
                                 displayed on e-mailed receipt. Current rate at 5%.</Text>
                         </View>
+                        <View style={{alignItems: 'center', paddingTop: 40}}>
+                            <View style={[styles.serviceItem,]}>
+                                <View>
+                                    <Text style={[styles.serviceTitle, {fontWeight: 'bold', fontSize: 22}]}>TOTAL</Text>
+                                </View>
+                                <View>
+                                    <Text style={{
+                                        color: '#91a3ff',
+                                        fontWeight: 'bold',
+                                        fontSize: 22,
+                                        marginLeft: 10,
+                                    }}>${this.calculateTotal()}</Text>
+                                </View>
+                            </View>
+                            <View style={{width: width * 0.8, height: 1, backgroundColor: '#cbcdff', marginBottom: 20}}>
+                                <View style={{width: width * 0.8, height: 1, backgroundColor: '#91a3ff'}}>
+                                </View>
+                            </View>
+                        </View>
+                        <TouchableOpacity style={{marginBottom: 30}} onPress={() => this.confirmOrder()}>
+                            <Text style={{color: '#91a3ff', fontSize: 18, fontWeight: 'bold'}}>CONFIRM ORDER</Text>
+                        </TouchableOpacity>
+
                     </ScrollView>
-                    <View style={{alignItems: 'center'}}>
-                        <View style={[styles.serviceItem,]}>
-                            <View>
-                                <Text style={[styles.serviceTitle, {fontWeight: 'bold', fontSize: 22}]}>TOTAL</Text>
-                            </View>
-                            <View>
-                                <Text style={{
-                                    color: '#91a3ff',
-                                    fontWeight: 'bold',
-                                    fontSize: 22,
-                                    marginLeft: 10,
-                                }}>${this.calculateTotal()}</Text>
-                            </View>
-                        </View>
-                        <View style={{width: width * 0.8, height: 1, backgroundColor: '#cbcdff', marginBottom: 20}}>
-                            <View style={{width: width * 0.8, height: 1, backgroundColor: '#91a3ff'}}>
-                            </View>
-                        </View>
-                    </View>
 
 
                 </View>
-                <TouchableOpacity style={{marginBottom: 30}} onPress={() => this.confirmOrder()}>
-                    <Text style={{color: '#91a3ff', fontSize: 18, fontWeight: 'bold'}}>CONFIRM ORDER</Text>
-                </TouchableOpacity>
 
 
             </View>
@@ -383,7 +479,7 @@ const styles = StyleSheet.create({
     },
     serviceItemContainer: {
         alignItems: 'center',
-        paddingBottom: 30
+        marginBottom: 30
     },
     titleContainer: {
         padding: 10,
@@ -403,7 +499,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         fontSize: 18,
-    }
+    },
+    textInput: {
+        color: '#91a3ff',
+        alignSelf: 'stretch',
+        flex: 1,
+        borderBottomWidth: 1,
+        borderBottomColor: '#91a3ff',
+    },
 });
 
 

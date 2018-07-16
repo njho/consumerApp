@@ -14,7 +14,9 @@ const defaultState = {
     vehicles: [],
     creditCards: [],
     promotions: [],
-    availablePromos: 0
+    availableSentPromos: 0,
+    receivedPromos: 0
+
 };
 
 export default (state = defaultState, action) => {
@@ -73,7 +75,8 @@ export default (state = defaultState, action) => {
             return {
                 ...state,
                 promotions: action.value,
-                availablePromos: action.availablePromos
+                availableSentPromos: action.availableSentPromos,
+                receivedPromos: action.receivedPromos
             };
         case 'SET_USER_META':
             return {

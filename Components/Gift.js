@@ -69,8 +69,6 @@ class Gift extends React.Component {
                     message: `I love never having to go to the gas station with the Sure Fuel App!\n\n If you order fuel with this code, we both get $7 off our purchase! \n \nCode: ${response}`
                 }).then(result => console.log(result)).catch(errorMsg => console.log(errorMsg));
         })
-
-
     };
 
 

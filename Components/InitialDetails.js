@@ -27,7 +27,6 @@ const mapStateToProps = state => ({
     firstName: state.auth.firstName,
     lastName: state.auth.lastName,
     phoneNumber: state.auth.phoneNumber,
-    referral: state.auth.referral,
 
     userInfoUpdated: state.auth.userInfoUpdated
 });
@@ -45,10 +44,7 @@ const mapDispatchToProps = dispatch => ({
     setLastName: (value) => {
         dispatch({type: 'SET_LAST_NAME', value: value});
     },
-    setReferral: (value) => {
-        dispatch({type: 'SET_REFERRAL', value: value});
-    },
-    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber, referral) => dispatch(agent.setters.setInitialUserDetails(uid, firstName, lastName, email, phoneNumber, referral))
+    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber) => dispatch(agent.setters.setInitialUserDetails(uid, firstName, lastName, email, phoneNumber))
 });
 
 
@@ -83,9 +79,6 @@ class InitialDetails extends React.Component {
             case 'phoneNumber':
                 this.props.setPhoneNumber(text);
                 break;
-            case 'referral':
-                this.props.setReferral(text);
-                break;
         }
     };
 
@@ -116,7 +109,7 @@ class InitialDetails extends React.Component {
 
                 <LinearGradient colors={['#484e4e', '#37abb8']}
                                 style={styles.container}>
-                    <ScrollView contentContainerStyle={{padding: 20, height: height}}>
+                    <ScrollView style={{height: height}} contentContainerStyle={{paddingHorizontal: 20}}>
 
                         <View style={styles.logoContainer}>
 
@@ -175,17 +168,7 @@ class InitialDetails extends React.Component {
                                     onChangeText={(text) => this.textHandler('phoneNumber', text)}
                                 />
                             </View>
-                            <View style={styles.listItem}>
-                                <TextInput
-                                    style={styles.textInput}
-                                    underlineColorAndroid='rgba(0,0,0,0)'
-                                    placeholderTextColor={'white'}
-                                    keyboardType={'numeric'}
-                                    placeholder={'Referral Code'}
-                                    value={this.props.referral}
-                                    onChangeText={(text) => this.textHandler('referral', text)}
-                                />
-                            </View>
+
                             <TouchableOpacity style={{alignSelf: 'stretch'}}
                                               onPress={() => this.initialLoadSubmit()}>
                                 <View style={{
@@ -222,6 +205,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
+        height: height
     },
 
     logo: {

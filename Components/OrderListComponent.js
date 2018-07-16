@@ -79,99 +79,105 @@ class OrderListComponent extends React.Component {
 
             <View
                 key={this.props.index} style={{
-                width: width, borderBottomColor: '#bbb',
-                borderBottomWidth: 1
+                width: width,
             }}>
-                {this.state.jobInfo === null ? null :
-                    <View>
-                        {this.state.jobInfo.cancelled || this.state.jobInfo.chargeCaptured ? null :
 
-                            <MapView
-                                mapType={"satellite"}
-                                provider={'google'}
-                                initialRegion={{
-                                    latitude: this.state.jobInfo.routing.location.lat,
-                                    longitude: this.state.jobInfo.routing.location.lng,
-                                    latitudeDelta: 0.0022,
-                                    longitudeDelta: 0.0221,
-                                }}
-                                showsCompass={false}
-                                style={{flex: 1, width: width, height: height * 0.3}}>
-                                <Marker
-                                    coordinate={{
+                {this.state.jobInfo === null || typeof (this.state.jobInfo) === 'undefined' ? null :
+                    <View
+                        key={this.props.index} style={{
+                        width: width, borderBottomColor: '#bbb',
+                        borderBottomWidth: 1
+                    }}>
+                        <View>
+                            {this.state.jobInfo.cancelled || this.state.jobInfo.chargeCaptured ? null :
+
+                                <MapView
+                                    mapType={"satellite"}
+                                    provider={'google'}
+                                    initialRegion={{
                                         latitude: this.state.jobInfo.routing.location.lat,
                                         longitude: this.state.jobInfo.routing.location.lng,
-                                    }}/>
-                            </MapView>}
+                                        latitudeDelta: 0.0022,
+                                        longitudeDelta: 0.0221,
+                                    }}
+                                    showsCompass={false}
+                                    style={{flex: 1, width: width, height: height * 0.3}}>
+                                    <Marker
+                                        coordinate={{
+                                            latitude: this.state.jobInfo.routing.location.lat,
+                                            longitude: this.state.jobInfo.routing.location.lng,
+                                        }}/>
+                                </MapView>}
 
-                        <View style={styles.orderContainer}>
-                            <Text style={[styles.orderTitle, {color: '#91a3ff'}]}>
-                                {moment.unix(this.state.jobInfo.timestamp / 1000).format('MMMM DD YYYY hh:mm A')}
-                            </Text>
-                            <TouchableOpacity onPress={() => this.openMap()}>
+                            <View style={styles.orderContainer}>
+                                <Text style={[styles.orderTitle, {color: '#91a3ff'}]}>
+                                    {moment.unix(this.state.jobInfo.timestamp / 1000).format('MMMM DD YYYY hh:mm A')}
+                                </Text>
+                                <TouchableOpacity onPress={() => this.openMap()}>
+                                    <Text style={[{
+                                        color: '#bccaff',
+                                        fontWeight: 'normal',
+                                        fontSize: 12,
+                                        textDecorationLine: 'none',
+                                        marginTop: 2
+                                    }]}>
+                                        Lat: {this.state.jobInfo.routing.location.lat}{"\n"}
+                                        Lng: {this.state.jobInfo.routing.location.lng}{"\n"}
+                                    </Text>
+                                </TouchableOpacity>
                                 <Text style={[{
                                     color: '#bccaff',
                                     fontWeight: 'normal',
                                     fontSize: 12,
-                                    textDecorationLine: 'none',
                                     marginTop: 2
                                 }]}>
-                                    Lat: {this.state.jobInfo.routing.location.lat}{"\n"}
-                                    Lng: {this.state.jobInfo.routing.location.lng}{"\n"}
-                                </Text>
-                            </TouchableOpacity>
-                            <Text style={[{
-                                color: '#bccaff',
-                                fontWeight: 'normal',
-                                fontSize: 12,
-                                marginTop: 2
-                            }]}>
-                                <Text style={{
-                                    textDecorationLine: 'underline',
-                                }}>Services: </Text>
-                                Fill, {this.state.jobInfo.servicesSelected.chip ? ' Windshield Chip Repair ' : null}
-                                {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Washer Fluid Top-Up ' : null}
-                                {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Tire Check & Fill ' : null}
-                                {"\n"}
-                                <Text style={{
-                                    textDecorationLine: 'underline',
-                                }}>Vehicle: </Text> {this.state.jobInfo.vehicle.make} {this.state.jobInfo.vehicle.model}, {this.state.jobInfo.vehicle.color}, {this.state.jobInfo.vehicle.license} {"\n"}
-                                <Text style={{
-                                    textDecorationLine: 'underline',
-                                }}>Fill:</Text> {this.state.jobInfo.octane === 87 ? 'Regular' : 'Premium'} {"\n"}
-
-                                <Text style={{
-                                    textDecorationLine: 'underline',
-                                }}>Amount:</Text> 60 L{"\n"}
-                                <Text style={{
-                                    textDecorationLine: 'underline',
-                                }}>OrderId:</Text> {this.props.item.jobId}
-                            </Text>
-                            {this.state.jobInfo.cancelled === true || this.state.jobInfo.chargeCaptured === true ? null :
-                                <TouchableOpacity onPress={() => this.props.cancelOrder(this.props.item.jobId)}>
                                     <Text style={{
-                                        color: '#91a3ff',
+                                        textDecorationLine: 'underline',
+                                    }}>Services: </Text>
+                                    Fill, {this.state.jobInfo.servicesSelected.chip ? ' Windshield Chip Repair ' : null}
+                                    {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Washer Fluid Top-Up ' : null}
+                                    {this.state.jobInfo.servicesSelected.windshieldTopUp ? ' Tire Check & Fill ' : null}
+                                    {"\n"}
+                                    <Text style={{
+                                        textDecorationLine: 'underline',
+                                    }}>Vehicle: </Text> {this.state.jobInfo.vehicle.make} {this.state.jobInfo.vehicle.model}, {this.state.jobInfo.vehicle.color}, {this.state.jobInfo.vehicle.license} {"\n"}
+                                    <Text style={{
+                                        textDecorationLine: 'underline',
+                                    }}>Fill:</Text> {this.state.jobInfo.octane === 87 ? 'Regular' : 'Premium'} {"\n"}
+
+                                    <Text style={{
+                                        textDecorationLine: 'underline',
+                                    }}>Amount:</Text> 60 L{"\n"}
+                                    <Text style={{
+                                        textDecorationLine: 'underline',
+                                    }}>OrderId:</Text> {this.props.item.jobId}
+                                </Text>
+                                {this.state.jobInfo.cancelled === true || this.state.jobInfo.chargeCaptured === true ? null :
+                                    <TouchableOpacity onPress={() => this.props.cancelOrder(this.props.item.jobId)}>
+                                        <Text style={{
+                                            color: '#91a3ff',
+                                            textAlign: 'right',
+                                            fontWeight: 'bold',
+                                            fontSize: 16
+                                        }}>
+                                            Cancel Order
+                                        </Text>
+                                    </TouchableOpacity>}
+
+                                {this.state.jobInfo.cancelled === false ? null :
+                                    <Text style={{
+                                        color: '#ff765f',
                                         textAlign: 'right',
                                         fontWeight: 'bold',
                                         fontSize: 16
                                     }}>
-                                        Cancel Order
+                                        Cancelled
                                     </Text>
-                                </TouchableOpacity>}
-
-                            {this.state.jobInfo.cancelled === false ? null :
-                                <Text style={{
-                                    color: '#ff765f',
-                                    textAlign: 'right',
-                                    fontWeight: 'bold',
-                                    fontSize: 16
-                                }}>
-                                    Cancelled
-                                </Text>
-                            }
+                                }
+                            </View>
                         </View>
-                    </View>}
 
+                    </View>}
 
             </View>
 

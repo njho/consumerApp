@@ -104,7 +104,7 @@ const getters = {
                     } else if (typeof doc.data().firstName === 'undefined' && typeof doc.data().lastName === 'undefined' && typeof doc.data().phone === 'undefined' && typeof doc.data().email === 'undefined' && typeof doc.data().walkthroughCompleted !== 'undefined') {
                         firstNavigation = 'InitialDetails';
                     } else {
-                        firstNavigation = 'Home'; //Home
+                        firstNavigation = 'OrderSummary'; //Home
                     }
                     dispatch({
                         type: 'SET_USER_META',
@@ -183,9 +183,10 @@ const getters = {
             firestore.collection('users').doc(uid).collection('codes').onSnapshot(querySnapshot => {
                 let array = [];
 
-                let availablePromos = 0;
+                let availableSentPromos = 0;
+                let receivedPromos = 0;
                 var itemsProcessed = 0;
-                console.log(querySnapshot.size)
+                console.log(querySnapshot.size);
 
                 querySnapshot.forEach(function (doc) {
                     firestore.collection('codes').doc(doc.id).get().then(codeData => {
@@ -199,15 +200,23 @@ const getters = {
                                 ...codeData.data(),
                                 id: codeData.id,
                             });
-                            if (codeData.data().status === 'activated' && ((codeData.data().issuer === uid && codeData.data().issuerRedeemed === false) || (codeData.data().receiver === uid && codeData.data().receiverRedeemed === false))) {
-                                availablePromos++;
+                            if ((codeData.data().issuer === uid && codeData.data().issuerRedeemed === false) || (codeData.data().receiver === uid && codeData.data().receiverRedeemed === false)) {
+                                availableSentPromos++;
+                            }
+                            if (((codeData.data().receiver === uid && codeData.data().receiverRedeemed === true) || (codeData.data().receiver === uid && codeData.data().receiverRedeemed === false))) {
+                                receivedPromos++;
                             }
 
                             if (itemsProcessed === querySnapshot.size) {
+                                console.log('available Sent promos: ' + availableSentPromos);
+                                console.log('available Received promos: ' + receivedPromos);
+
                                 dispatch({
                                     type: 'SET_USER_PROMOTIONS',
                                     value: array,
-                                    availablePromos: availablePromos
+                                    availableSentPromos: availableSentPromos,
+                                    receivedPromos: receivedPromos
+
                                 });
                             }
                         }
@@ -234,8 +243,6 @@ const getters = {
                     type: 'SET_AVAILABLE_ZONES',
                     value: array
                 });
-
-
             })
         }
     },
@@ -260,7 +267,7 @@ const setters = {
                 console.log('Error getting document', err);
             });
     },
-    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber, referral) => {
+    setInitialUserDetails: (uid, firstName, lastName, email, phoneNumber) => {
         return dispatch => {
             firestore.collection('users').doc(uid).set({
                     firstName: firstName,
@@ -268,7 +275,6 @@ const setters = {
                     email: email,
                     phoneNumber: phoneNumber,
                     walkthroughCompleted: true,
-                    referral: referral
                 }, {merge: true})
                 .then((docRef) => {
                     dispatch({
@@ -305,12 +311,10 @@ const actions = {
             if (isNew) {
                 firestore.collection('users').doc(uid).collection('vehicles').add(vehicleObject)
                     .then((docRef) => {
-
                         console.log('This is the value of redirect => ' + redirect);
                         console.log(docRef.id)
                         if (redirect) {
                             NavigationService.navigate('OrderSummary');
-
                         } else if (redirect === null || typeof redirect === 'undefined' || redirect === 'undefined') {
                             NavigationService.navigate('Settings');
 
@@ -552,6 +556,22 @@ const actions = {
             })
         });
     },
+    validateGiftCode: async function (uid, couponCode) {
+        return fetch('https://us-central1-surefuelapp.cloudfunctions.net/applyCoupon', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                receiver: uid,
+                timestamp: Date.now(),
+                couponId: couponCode
+            })
+        });
+    },
+
+
 
 }
 
