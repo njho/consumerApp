@@ -62,10 +62,29 @@ export default (state = defaultState, action) => {
         case 'RESET_ALL_ORDER_INFO':
             return {
                 ...state,
+                octane: 0,
                 loginState: 0,
                 orderHour: 0,
                 orderFill: 0,
-                servicesSelected: [false, false, false],
+                servicesSelected: {
+                    windshieldTopUp: false,
+                    chip: false,
+                    tire: false
+                },
+                feedback: null,
+                regular: 0,
+                premium: 0,
+                windshield: 0,
+                topUp: 0,
+                tire: 0,
+                lat: 0,
+                lng: 0,
+                initialNavigation: null,
+                orderVehicle: {},
+                recurringOrder: false,
+                deliverRates: {},
+                orderReferral: '',
+                orderPromotion: null
             };
         case 'SET_AVAILABLE_ZONES':
             return {

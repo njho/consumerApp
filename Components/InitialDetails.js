@@ -86,7 +86,7 @@ class InitialDetails extends React.Component {
 
         //THIS WILL BE TRUE AFTER ALL THE INFORMATION IS UPDATED
         if (nextProps.userInfoUpdated === true) {
-            this.props.navigation.navigate('Home');
+            this.props.navigation.navigate('InitialCoupon');
         }
     }
 
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
         width: 90,
     },
     logoContainer: {
-        paddingVertical: 0.05 * height,
+        paddingVertical: 0.07 * height,
         justifyContent: 'center',
         alignItems: 'center'
     },

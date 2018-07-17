@@ -28,6 +28,8 @@ const mapStateToProps = state => ({
     orderVehicle: state.common.orderVehicle,
     orderPromotion: state.common.orderPromotion,
     orderReferral: state.common.orderReferral,
+    recurringOrder: state.common.recurringOrder,
+    promotions: state.auth.promotions,
 
     paymentInfo: state.auth.userPayment,
     vehicles: state.auth.vehicles,
@@ -57,8 +59,8 @@ const mapDispatchToProps = dispatch => ({
     confirmOrder: (uid, cardId) => {
         dispatch(agent.actions.createCharge(uid, cardId));
     },
-    createOrder: (orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle) => {
-        dispatch(agent.actions.createOrder(orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle));
+    createOrder: (orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle, promotionId, recurringOrder) => {
+        dispatch(agent.actions.createOrder(orderFill, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshield, tire, topUp, lat, lng, uid, total, stripeInfo, vehicle, promotionId, recurringOrder));
     },
     setOrderVehicle: (value) => {
         dispatch({type: 'SET_ORDER_VEHICLE', value: value});
@@ -97,8 +99,7 @@ class OrderSummary extends React.Component {
     confirmOrder = () => {
         console.log('This is the current Date');
         console.log();
-        let now = moment.unix(1531065175);
-        console.log(now.format('DD MM YY H:MM'));
+        let now = moment();
         let currentTime = now.format("HH:mm");
         let end = now.add(this.props.orderHour, 'h').format("HH:mm");
         console.log(currentTime, end);
@@ -112,24 +113,41 @@ class OrderSummary extends React.Component {
 
         let approximateLoad = ((this.props.orderFill - (this.props.servicesSelected.windshieldTopUp * this.props.topUp + this.props.servicesSelected.windshield * this.props.windshield + this.props.servicesSelected.tire * this.props.tire)) * 0.95 - 5) / octanePrice;
 
-        this.props.createOrder(this.props.orderFill, this.props.octane, octanePrice, approximateLoad, currentTime.toString(), end.toString(), this.props.orderHour, this.props.servicesSelected, this.props.windshield, this.props.tire, this.props.topUp, this.props.lat, this.props.lng, this.props.user.uid, this.calculateTotal(), this.props.paymentInfo, this.props.orderVehicle);
+        this.props.createOrder(this.props.orderFill,
+            this.props.octane,
+            octanePrice,
+            approximateLoad,
+            currentTime.toString(),
+            end.toString(),
+            this.props.orderHour,
+            this.props.servicesSelected,
+            this.props.windshield, this.props.tire,
+            this.props.topUp,
+            this.props.lat,
+            this.props.lng,
+            this.props.user.uid,
+            this.calculateTotal(),
+            this.props.paymentInfo,
+            this.props.orderVehicle,
+            this.props.orderPromotion.id,
+            this.props.recurringOrder);
     };
 
-    // componentWillMount() {
-    //     console.log(this.props.orderVehicle);
-    //     console.log(this.props.creditCards);
-    //     if (this.props.creditCards.length === 1) {
-    //         console.log('There is a default Credit Card Already');
-    //         if (this.props.vehicles.length === 1) {
-    //             console.log(this.props.vehicles)
-    //             this.props.setOrderVehicle(this.props.vehicles[0]);
-    //         }
-    //     } else if (this.props.creditCards.length === 0) {
-    //         this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
-    //     }
-    //     console.log('Order Promotion');
-    //     console.log(this.props.orderPromotion);
-    // }
+    componentWillMount() {
+        console.log(this.props.orderVehicle);
+        console.log(this.props.creditCards);
+        if (this.props.creditCards.length === 1) {
+            console.log('There is a default Credit Card Already');
+            if (this.props.vehicles.length === 1) {
+                console.log(this.props.vehicles)
+                this.props.setOrderVehicle(this.props.vehicles[0]);
+            }
+        } else if (this.props.creditCards.length === 0) {
+            this.props.navigation.navigate('EditCC', {isNew: true, redirect: true});
+        }
+        console.log('Order Promotion');
+        console.log(this.props.orderPromotion);
+    }
 
     textHandler(value, text) {
         switch (value) {
@@ -347,7 +365,7 @@ class OrderSummary extends React.Component {
                             : null}
 
 
-                        {this.props.availablePromos > 0 && this.props.orderPromotion == null ? <TouchableOpacity
+                        {this.props.promotions.length > 0 && this.props.orderPromotion == null ? <TouchableOpacity
                             onPress={() => this.props.navigation.navigate('PromotionPicker')
                             }
                             style={{

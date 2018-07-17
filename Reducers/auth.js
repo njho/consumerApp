@@ -51,11 +51,12 @@ export default (state = defaultState, action) => {
                 ...state,
                 user: action.value
             };
-        case 'SET_REFERRAL':
+        case 'SET_INITIAL_REFERRAL':
             return {
                 ...state,
                 referral: action.value
             };
+
         case 'USER_INFO_UPDATED':
             return {
                 ...state,

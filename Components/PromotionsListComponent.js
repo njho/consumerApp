@@ -18,7 +18,6 @@ import {connect} from 'react-redux';
 import NavigationService from '../Helpers/NavigationService';
 
 
-
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
@@ -52,11 +51,8 @@ class PromotionsListComponent extends React.Component {
 
         let identifier;
 
-        if(this.props.issuer)
 
-
-
-        if (this.props.item.status === 'activated' && this.props.item.issuerRedeemed === false) {
+        if (((this.props.item.issuer === this.props.user.uid && this.props.item.issuerRedeemed === false) || (this.props.item.receiver === this.props.user.uid && this.props.item.receiverRedeemed === false) ) || ((this.props.item.receiver === this.props.user.uid && this.props.item.receiverRedeemed === true) || (this.props.item.receiver === uid && this.props.item.receiverRedeemed === false))) {
             return <View
                 key={this.props.index}
                 style={{
@@ -80,9 +76,8 @@ class PromotionsListComponent extends React.Component {
                 </TouchableWithoutFeedback>
             </View>
         } else {
-            return null;
+            return null
         }
-
 
     }
 

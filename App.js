@@ -33,6 +33,7 @@ import CreditCards from './Components/CreditCards';
 import EditCC from './Components/EditCC';
 import InitialDetails from './Components/InitialDetails';
 import PromotionPicker from './Components/PromotionPicker';
+import InitialCoupon from './Components/InitialCoupon';
 
 
 
@@ -80,9 +81,10 @@ class App extends React.Component {
 }
 
 const WalkThroughStack = StackNavigator({
-
     WalkThrough: WalkThrough,
     InitialDetails: InitialDetails,
+    InitialCoupon: InitialCoupon,
+
 
 });
 const AuthStack = StackNavigator({

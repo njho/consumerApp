@@ -104,7 +104,7 @@ const getters = {
                     } else if (typeof doc.data().firstName === 'undefined' && typeof doc.data().lastName === 'undefined' && typeof doc.data().phone === 'undefined' && typeof doc.data().email === 'undefined' && typeof doc.data().walkthroughCompleted !== 'undefined') {
                         firstNavigation = 'InitialDetails';
                     } else {
-                        firstNavigation = 'OrderSummary'; //Home
+                        firstNavigation = 'InitialCoupon'; //Home InitialCoupon
                     }
                     dispatch({
                         type: 'SET_USER_META',
@@ -210,6 +210,7 @@ const getters = {
                             if (itemsProcessed === querySnapshot.size) {
                                 console.log('available Sent promos: ' + availableSentPromos);
                                 console.log('available Received promos: ' + receivedPromos);
+                                console.log(array);
 
                                 dispatch({
                                     type: 'SET_USER_PROMOTIONS',
@@ -418,7 +419,7 @@ const actions = {
                 });
         }
     },
-    createOrder: (fillAmount, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshieldCost, tireCost, topUpCost, lat, lng, uid, total, stripeInformation, vehicleInfo) => {
+    createOrder: (fillAmount, octane, octanePrice, approximateLoad, start, end, orderHour, servicesSelected, windshieldCost, tireCost, topUpCost, lat, lng, uid, total, stripeInformation, vehicleInfo, promotionId, recurringOrder) => {
         return dispatch => {
             console.log('This is the charge');
 
@@ -454,7 +455,9 @@ const actions = {
                 },
                 driver: null,
                 vehicle: vehicleInfo,
-                paymentInfo: stripeInformation
+                paymentInfo: stripeInformation,
+                promotionId: promotionId,
+                recurringOrder
 
             });
 
@@ -496,10 +499,16 @@ const actions = {
                     chargeCaptured: false,
                     vehicle: vehicleInfo,
                     paymentInfo: stripeInformation,
-                    driverStatus: null
+                    driverStatus: null,
+                    promotionId: promotionId,
+                recurringOrder: recurringOrder
+
                 })
                 .then((docRef) => {
                     console.log(docRef);
+                    dispatch({
+                        type: 'RESET_ALL_ORDER_INFO',
+                    });
                     NavigationService.navigate('Home');
                 });
         }
@@ -509,6 +518,7 @@ const actions = {
         firestore.collection('drivers').doc('calgary').collection('activeDrivers').add(object)
             .then((docRef) => {
                 console.log(docRef);
+
                 NavigationService.navigate('Home');
             });
 
@@ -570,7 +580,6 @@ const actions = {
             })
         });
     },
-
 
 
 }
