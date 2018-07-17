@@ -147,7 +147,7 @@ class OrderSummary extends React.Component {
         return data;
     }
 
-    validatePromotion = (uid) => {o
+    validatePromotion = (uid) => {
         console.log('Fuck');
         this.setState({...this.state, loading: true});
 
