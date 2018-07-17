@@ -397,7 +397,7 @@ class BasicOrder extends React.Component {
                                             <Text style={{color: '#dda6ff', fontWeight: 'bold', paddingLeft: 15}}>
                                                 Make this a weekly service
                                             </Text>
-                                            <Text style={{paddingLeft: 15, color: '#dda6ff', fontSize: 11}}>
+                                            <Text style={{paddingHorizontal: 15, color: '#dda6ff', fontSize: 11}}>
                                                 10% discount after 3 fills.
                                             </Text>
                                         </View>
